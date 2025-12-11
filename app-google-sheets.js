@@ -427,12 +427,32 @@ function criarCardProcesso(proc, index) {
                 </div>
                 <div class="timeline-item">
                     <i class="fas fa-clock"></i>
-                    <span><strong>Duração:</strong> ${duracao}</span>
+                    <span><strong>Duração:</strong> ${proc.duracaoTotal || duracao}</span>
+                </div>
+                <div class="timeline-item">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span><strong>Dias Restantes:</strong> ${proc.diasRestantes || '-'}</span>
+                </div>
+            </div>
+            
+            <div class="card-timeline mt-2">
+                <div class="timeline-item">
+                    <i class="fas fa-building"></i>
+                    <span><strong>Unidade:</strong> ${proc.unidadeDemandante || '-'}</span>
+                </div>
+                <div class="timeline-item">
+                    <i class="fas fa-user-tie"></i>
+                    <span><strong>Responsável:</strong> ${proc.responsavelDemanda || responsaveis}</span>
                 </div>
                 <div class="timeline-item">
                     <i class="fas fa-layer-group"></i>
                     <span><strong>Categoria:</strong> ${proc.categoria || '-'}</span>
                 </div>
+                ${proc.statusAtual ? `
+                <div class="timeline-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span><strong>Status:</strong> ${proc.statusAtual}</span>
+                </div>` : ''}
             </div>
             
             <div class="card-indicators">
@@ -566,20 +586,20 @@ function criarConteudoAbaProcesso(proc, index) {
                     <span class="info-value">${proc.sei || '-'}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Prioridade:</span>
-                    <span class="badge badge-${proc.prioridade?.toLowerCase() || 'media'}">${proc.prioridade || 'Média'}</span>
+                    <span class="info-label">Unidade:</span>
+                    <span class="info-value">${proc.unidadeDemandante || '-'}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Categoria:</span>
                     <span class="info-value">${proc.categoria || '-'}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Status Geral:</span>
-                    <span class="status-badge status-${statusGeral.toLowerCase().replace(' ', '-')}">${statusGeral}</span>
+                    <span class="info-label">Prioridade:</span>
+                    <span class="badge badge-${proc.prioridade?.toLowerCase() || 'media'}">${proc.prioridade || 'Média'}</span>
                 </div>
-                <div class="info-item highlight">
-                    <span class="info-label">% Conclusão:</span>
-                    <span class="info-value-big">${progressoPct}%</span>
+                <div class="info-item">
+                    <span class="info-label">Responsável:</span>
+                    <span class="info-value">${proc.responsavelDemanda || '-'}</span>
                 </div>
             </div>
             
@@ -593,8 +613,27 @@ function criarConteudoAbaProcesso(proc, index) {
                     <span class="info-value">${proc.dataTermino || '-'}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Duração:</span>
-                    <span class="info-value">${duracao}</span>
+                    <span class="info-label">Duração Total:</span>
+                    <span class="info-value">${proc.duracaoTotal || duracao}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Dias Restantes:</span>
+                    <span class="info-value ${parseInt(proc.diasRestantes) < 0 ? 'text-danger' : ''}">${proc.diasRestantes || '-'}</span>
+                </div>
+            </div>
+
+            <div class="info-grid mt-2">
+                <div class="info-item highlight">
+                    <span class="info-label">Progresso Geral:</span>
+                    <span class="info-value-big">${proc.progressoGeral || progressoPct + '%'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status Atual:</span>
+                    <span class="status-badge status-${(proc.statusAtual || statusGeral).toLowerCase().replace(' ', '-')}">${proc.statusAtual || statusGeral}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Etapas:</span>
+                    <span class="info-value">${concluidas}/${totalEtapas} concluídas</span>
                 </div>
             </div>
 
@@ -624,26 +663,27 @@ function criarConteudoAbaProcesso(proc, index) {
                     <table class="etapas-table">
                         <thead>
                             <tr>
-                                <th>Etapa</th>
-                                <th>Status</th>
-                                <th>Responsável</th>
-                                <th>Dt. Início</th>
-                                <th>Dt. Término</th>
-                                <th>Produtos/Entregas</th>
-                                <th>% Progresso</th>
-                                <th>Horas</th>
-                                <th>Peso</th>
+                                <th style="width: 20%">Etapa</th>
+                                <th style="width: 10%">Status</th>
+                                <th style="width: 12%">Responsável</th>
+                                <th style="width: 8%">Início</th>
+                                <th style="width: 8%">Término</th>
+                                <th style="width: 10%">Situação</th>
+                                <th style="width: 12%">Progresso</th>
+                                <th style="width: 8%">Horas</th>
+                                <th style="width: 6%">Peso</th>
+                                <th style="width: 6%">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${proc.etapas.map(etapa => `
+                            ${proc.etapas.map((etapa, etapaIdx) => `
                                 <tr>
                                     <td><strong>${etapa.nome}</strong></td>
                                     <td><span class="status-badge status-${etapa.status.toLowerCase().replace(' ', '-')}">${etapa.status}</span></td>
                                     <td>${etapa.responsavel || '-'}</td>
                                     <td>${etapa.dataInicio || '-'}</td>
                                     <td>${etapa.dataTermino || '-'}</td>
-                                    <td>${etapa.produtos || '-'}</td>
+                                    <td><span class="badge badge-situacao ${etapa.situacao ? '' : 'hidden'}">${etapa.situacao || '-'}</span></td>
                                     <td>
                                         <div class="progress-bar">
                                             <div class="progress-fill" style="width: ${(etapa.progresso || 0) * 100}%">
@@ -651,9 +691,41 @@ function criarConteudoAbaProcesso(proc, index) {
                                             </div>
                                         </div>
                                     </td>
-                                    <td>${etapa.horasEstimadas || 0}h</td>
+                                    <td>${etapa.horasEstimadas || 0}h / ${etapa.horasReais || 0}h</td>
                                     <td>${((etapa.peso || 0) * 100).toFixed(0)}%</td>
+                                    <td>
+                                        ${etapa.tarefasTexto || etapa.observacoes || etapa.produtos ? 
+                                            `<button class="btn-mini" onclick="toggleEtapaDetails('${processoId}-etapa-${etapaIdx}')"><i class="fas fa-chevron-down"></i></button>` 
+                                            : '<span style="color: #999">-</span>'}
+                                    </td>
                                 </tr>
+                                ${etapa.tarefasTexto || etapa.observacoes || etapa.produtos ? `
+                                <tr id="${processoId}-etapa-${etapaIdx}" class="etapa-details" style="display: none;">
+                                    <td colspan="10">
+                                        <div class="etapa-details-content">
+                                            ${etapa.produtos ? `
+                                            <div class="detail-section">
+                                                <strong><i class="fas fa-box"></i> Produtos/Entregas:</strong>
+                                                <p>${etapa.produtos}</p>
+                                            </div>` : ''}
+                                            ${etapa.tarefasTexto ? `
+                                            <div class="detail-section">
+                                                <strong><i class="fas fa-tasks"></i> Tarefas:</strong>
+                                                <p style="white-space: pre-line;">${etapa.tarefasTexto}</p>
+                                            </div>` : ''}
+                                            ${etapa.observacoes ? `
+                                            <div class="detail-section">
+                                                <strong><i class="fas fa-comment-alt"></i> Observações:</strong>
+                                                <p style="white-space: pre-line;">${etapa.observacoes}</p>
+                                            </div>` : ''}
+                                            ${etapa.dependencias && etapa.dependencias !== '-' ? `
+                                            <div class="detail-section">
+                                                <strong><i class="fas fa-link"></i> Dependências:</strong>
+                                                <p>${etapa.dependencias}</p>
+                                            </div>` : ''}
+                                        </div>
+                                    </td>
+                                </tr>` : ''}
                             `).join('')}
                         </tbody>
                     </table>
@@ -718,6 +790,24 @@ function switchSubTab(processoId, subtab) {
     
     if (targetBtn) targetBtn.classList.add('active');
     if (targetContent) targetContent.classList.add('active');
+}
+
+// ==================== TOGGLE DE DETALHES DAS ETAPAS ====================
+function toggleEtapaDetails(etapaId) {
+    const detailsRow = document.getElementById(etapaId);
+    const btn = event.target.closest('.btn-mini');
+    
+    if (detailsRow) {
+        const isHidden = detailsRow.style.display === 'none';
+        detailsRow.style.display = isHidden ? 'table-row' : 'none';
+        
+        if (btn) {
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.className = isHidden ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+            }
+        }
+    }
 }
 
 // ==================== SALVAR DADOS NO GOOGLE SHEETS ====================

@@ -1022,6 +1022,92 @@ body {
     font-weight: 600;
 }
 
+/* ==================== DETALHES DAS ETAPAS (EXPANSÍVEL) ==================== */
+.etapa-details {
+    background: #f8f9fa;
+    animation: fadeIn 0.3s ease;
+}
+
+.etapa-details-content {
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    margin: 10px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.detail-section {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.detail-section strong {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+}
+
+.detail-section strong i {
+    margin-right: 5px;
+}
+
+.detail-section p {
+    margin: 0;
+    padding-left: 23px;
+    color: #495057;
+    line-height: 1.6;
+}
+
+.btn-mini {
+    background: transparent;
+    border: 1px solid #dee2e6;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+.btn-mini:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-mini i {
+    transition: transform 0.2s ease;
+}
+
+.badge-situacao {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-situacao.hidden {
+    display: none;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+    font-weight: 600;
+}
+
+.mt-2 {
+    margin-top: 15px;
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
     .kpis-grid {
