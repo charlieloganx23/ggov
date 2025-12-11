@@ -517,52 +517,67 @@ function criarConteudoAbaProcesso(proc, index) {
             </div>
         </div>
 
-        <div class="etapas-section">
-            <h3 class="subsection-title">🔄 ETAPAS DO PROCESSO - DETALHAMENTO COMPLETO</h3>
-            <p class="hint">💡 Total de ${totalEtapas} etapa(s) - ${concluidas} concluída(s), ${emExec} em execução</p>
-            
-            <div class="table-responsive">
-                <table class="etapas-table">
-                    <thead>
-                        <tr>
-                            <th>Etapa</th>
-                            <th>Status</th>
-                            <th>Responsável</th>
-                            <th>Dt. Início</th>
-                            <th>Dt. Término</th>
-                            <th>Produtos/Entregas</th>
-                            <th>% Progresso</th>
-                            <th>Horas</th>
-                            <th>Peso</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${proc.etapas.map(etapa => `
+        <!-- SUB-NAVEGAÇÃO: ETAPAS E TAREFAS -->
+        <div class="sub-tabs-navigation">
+            <button class="sub-tab-btn active" onclick="switchSubTab('${processoId}', 'etapas')">
+                🔄 ETAPAS DO PROCESSO
+            </button>
+            <button class="sub-tab-btn" onclick="switchSubTab('${processoId}', 'tarefas')">
+                📝 TAREFAS DETALHADAS
+            </button>
+        </div>
+
+        <!-- CONTEÚDO: ETAPAS -->
+        <div id="${processoId}-etapas" class="sub-tab-content active">
+            <div class="etapas-section">
+                <h3 class="subsection-title">🔄 ETAPAS DO PROCESSO - DETALHAMENTO COMPLETO</h3>
+                <p class="hint">💡 Total de ${totalEtapas} etapa(s) - ${concluidas} concluída(s), ${emExec} em execução</p>
+                
+                <div class="table-responsive">
+                    <table class="etapas-table">
+                        <thead>
                             <tr>
-                                <td><strong>${etapa.nome}</strong></td>
-                                <td><span class="status-badge status-${etapa.status.toLowerCase().replace(' ', '-')}">${etapa.status}</span></td>
-                                <td>${etapa.responsavel || '-'}</td>
-                                <td>${etapa.dataInicio || '-'}</td>
-                                <td>${etapa.dataTermino || '-'}</td>
-                                <td>${etapa.produtos || '-'}</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${(etapa.progresso || 0) * 100}%">
-                                            ${Math.round((etapa.progresso || 0) * 100)}%
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>${etapa.horasEstimadas || 0}h</td>
-                                <td>${((etapa.peso || 0) * 100).toFixed(0)}%</td>
+                                <th>Etapa</th>
+                                <th>Status</th>
+                                <th>Responsável</th>
+                                <th>Dt. Início</th>
+                                <th>Dt. Término</th>
+                                <th>Produtos/Entregas</th>
+                                <th>% Progresso</th>
+                                <th>Horas</th>
+                                <th>Peso</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            ${proc.etapas.map(etapa => `
+                                <tr>
+                                    <td><strong>${etapa.nome}</strong></td>
+                                    <td><span class="status-badge status-${etapa.status.toLowerCase().replace(' ', '-')}">${etapa.status}</span></td>
+                                    <td>${etapa.responsavel || '-'}</td>
+                                    <td>${etapa.dataInicio || '-'}</td>
+                                    <td>${etapa.dataTermino || '-'}</td>
+                                    <td>${etapa.produtos || '-'}</td>
+                                    <td>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: ${(etapa.progresso || 0) * 100}%">
+                                                ${Math.round((etapa.progresso || 0) * 100)}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>${etapa.horasEstimadas || 0}h</td>
+                                    <td>${((etapa.peso || 0) * 100).toFixed(0)}%</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <div class="tarefas-section">
-            <h3 class="subsection-title">📝 TAREFAS DETALHADAS POR ETAPA</h3>
+        <!-- CONTEÚDO: TAREFAS -->
+        <div id="${processoId}-tarefas" class="sub-tab-content">
+            <div class="tarefas-section">
+                <h3 class="subsection-title">📝 TAREFAS DETALHADAS POR ETAPA</h3>
             
             <div class="table-responsive">
                 <table class="tarefas-table">
@@ -595,9 +610,27 @@ function criarConteudoAbaProcesso(proc, index) {
                 </table>
             </div>
         </div>
+        </div>
     `;
     
     return section;
+}
+
+// ==================== NAVEGAÇÃO DE SUB-ABAS ====================
+function switchSubTab(processoId, subtab) {
+    // Remover active de todos os botões e conteúdos do processo específico
+    const processoSection = document.getElementById(processoId);
+    if (!processoSection) return;
+    
+    processoSection.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+    processoSection.querySelectorAll('.sub-tab-content').forEach(content => content.classList.remove('active'));
+    
+    // Adicionar active aos selecionados
+    const targetBtn = processoSection.querySelector(`.sub-tab-btn[onclick*="${subtab}"]`);
+    const targetContent = document.getElementById(`${processoId}-${subtab}`);
+    
+    if (targetBtn) targetBtn.classList.add('active');
+    if (targetContent) targetContent.classList.add('active');
 }
 
 // ==================== SALVAR DADOS NO GOOGLE SHEETS ====================
