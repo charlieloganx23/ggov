@@ -1653,11 +1653,16 @@ function initCharts() {
     const processoNomes = [];
     
     todosProcessos.forEach((proc, idx) => {
-        // Contar status de todas as etapas
+        // Contar status de todas as etapas (normalizado)
         proc.etapas.forEach(etapa => {
-            const status = etapa.status;
-            if (status in statusCount) {
-                statusCount[status]++;
+            const statusNormalizado = (etapa.status || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            
+            if (statusNormalizado === 'concluida' || statusNormalizado === 'concluido') {
+                statusCount['Concluída']++;
+            } else if (statusNormalizado.includes('execu')) {
+                statusCount['Em execução']++;
+            } else if (statusNormalizado.includes('nao') || statusNormalizado.includes('não')) {
+                statusCount['Não iniciada']++;
             }
         });
         
@@ -1866,7 +1871,7 @@ function atualizarEstatisticasConsolidadas() {
 function updateCharts() {
     if (!statusChart || !progressChart || todosProcessos.length === 0) return;
     
-    // Atualizar contagem de status
+    // Atualizar contagem de status (normalizado)
     const statusCount = {
         'Em execução': 0,
         'Concluída': 0,
@@ -1877,9 +1882,14 @@ function updateCharts() {
     
     todosProcessos.forEach(proc => {
         proc.etapas.forEach(etapa => {
-            const status = etapa.status;
-            if (status in statusCount) {
-                statusCount[status]++;
+            const statusNormalizado = (etapa.status || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            
+            if (statusNormalizado === 'concluida' || statusNormalizado === 'concluido') {
+                statusCount['Concluída']++;
+            } else if (statusNormalizado.includes('execu')) {
+                statusCount['Em execução']++;
+            } else if (statusNormalizado.includes('nao') || statusNormalizado.includes('não')) {
+                statusCount['Não iniciada']++;
             }
         });
         
