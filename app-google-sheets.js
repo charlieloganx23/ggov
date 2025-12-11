@@ -11,15 +11,11 @@ const GOOGLE_SHEETS_CONFIG = {
     apiKey: 'SUA_API_KEY_AQUI', // Substituir pela sua API Key
     spreadsheetId: 'SEU_SPREADSHEET_ID_AQUI', // ID da planilha (da URL)
     
-    // Ranges das abas na planilha (Estrutura Tradicional)
-    ranges: {
-        // Informações do projeto (linha 3, colunas A-F)
-        infoRow: 'Processo 1!A3:F3',
-        // Etapas (a partir da linha 7, até 50 linhas)
-        etapas: 'Processo 1!A7:K50',
-        // Tarefas (a partir da linha 17, até 100 linhas)
-        tarefas: 'Processo 1!A17:I100'
-    },
+    // Lista de processos (abas) a serem monitorados
+    processos: [
+        'Processo 1'
+        // Adicione mais abas aqui: 'Processo 2', 'Processo 3', etc.
+    ],
     
     // Intervalo de atualização automática (em milissegundos)
     autoRefreshInterval: 30000 // 30 segundos
@@ -27,6 +23,7 @@ const GOOGLE_SHEETS_CONFIG = {
 
 let autoRefreshTimer = null;
 let isGoogleSheetsConnected = false;
+let todosProcessos = []; // Array para armazenar todos os processos
 
 // ==================== INICIALIZAÇÃO COM GOOGLE SHEETS ====================
 document.addEventListener('DOMContentLoaded', function() {
@@ -88,37 +85,76 @@ function initGoogleAPI() {
 async function loadDataFromGoogleSheets() {
     try {
         showLoading(true);
+        todosProcessos = []; // Limpar array
         
-        // Buscar informações do projeto (linha 3, colunas A-G)
+        // Carregar todos os processos configurados
+        for (const nomeProcesso of GOOGLE_SHEETS_CONFIG.processos) {
+            await loadProcessoData(nomeProcesso);
+        }
+        
+        // Renderizar todos os processos
+        renderTodosProcessos();
+        calcularKPIsGlobais();
+        updateCharts();
+        
+        console.log('✅ Dados de todos os processos carregados:', new Date().toLocaleTimeString());
+        showNotification(`✅ ${todosProcessos.length} processo(s) atualizado(s)!`, 'success');
+        showLoading(false);
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar dados:', error);
+        showNotification('❌ Erro ao carregar dados', 'error');
+        showLoading(false);
+        loadLocalData();
+    }
+}
+
+async function loadProcessoData(nomeProcesso) {
+    try {
+        const ranges = {
+            infoRow: `${nomeProcesso}!A3:F3`,
+            etapas: `${nomeProcesso}!A7:K50`,
+            tarefas: `${nomeProcesso}!A17:I100`
+        };
+        
+        const processo = {
+            nome: nomeProcesso,
+            sei: '',
+            prioridade: '',
+            categoria: '',
+            dataInicio: '',
+            dataTermino: '',
+            descricao: '',
+            etapas: [],
+            tarefas: []
+        };
+        
+        // Buscar informações do projeto
         const infoResponse = await gapi.client.sheets.spreadsheets.values.get({
             spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
-            range: GOOGLE_SHEETS_CONFIG.ranges.infoRow
+            range: ranges.infoRow
         });
         
-        // Atualizar informações do projeto
         if (infoResponse.result.values && infoResponse.result.values.length > 0) {
             const infoRow = infoResponse.result.values[0];
-            processoData.sei = infoRow[0] || processoData.sei;
-            processoData.prioridade = infoRow[1] || processoData.prioridade;
-            processoData.categoria = infoRow[2] || processoData.categoria;
-            processoData.dataInicio = infoRow[3] || processoData.dataInicio;
-            processoData.dataTermino = infoRow[4] || processoData.dataTermino;
-            processoData.descricao = infoRow[5] || processoData.descricao;
+            processo.sei = infoRow[0] || '';
+            processo.prioridade = infoRow[1] || '';
+            processo.categoria = infoRow[2] || '';
+            processo.dataInicio = infoRow[3] || '';
+            processo.dataTermino = infoRow[4] || '';
+            processo.descricao = infoRow[5] || '';
         }
         
         // Buscar dados das etapas
-        const response = await gapi.client.sheets.spreadsheets.values.get({
+        const etapasResponse = await gapi.client.sheets.spreadsheets.values.get({
             spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
-            range: GOOGLE_SHEETS_CONFIG.ranges.etapas
+            range: ranges.etapas
         });
         
-        const rows = response.result.values;
-        
-        if (rows && rows.length > 0) {
-            // Processar dados das etapas (filtrar linhas vazias)
-            processoData.etapas = rows
-                .filter(row => row[0] && row[0].trim() !== '') // Ignorar linhas sem nome de etapa
-                .map((row, index) => ({
+        if (etapasResponse.result.values && etapasResponse.result.values.length > 0) {
+            processo.etapas = etapasResponse.result.values
+                .filter(row => row[0] && row[0].trim() !== '')
+                .map(row => ({
                     nome: row[0] || '',
                     status: row[1] || 'Não iniciada',
                     responsavel: row[2] || '',
@@ -131,81 +167,193 @@ async function loadDataFromGoogleSheets() {
                     horasReais: parseInt(row[9]) || 0,
                     peso: parseFloat(row[10]) || 0.15
                 }));
-            
-            // Buscar dados das tarefas
-            const tarefasResponse = await gapi.client.sheets.spreadsheets.values.get({
-                spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
-                range: GOOGLE_SHEETS_CONFIG.ranges.tarefas
-            });
-            
-            const tarefasRows = tarefasResponse.result.values;
-            
-            if (tarefasRows && tarefasRows.length > 0) {
-                // Filtrar linhas vazias nas tarefas também
-                processoData.tarefas = tarefasRows
-                    .filter(row => row[1] && row[1].trim() !== '') // Ignorar linhas sem nome de tarefa
-                    .map(row => ({
-                        etapa: row[0] || '',
-                        nome: row[1] || '',
-                        status: row[2] || 'Não iniciada',
-                        responsavel: row[3] || '',
-                        prioridade: row[4] || 'Média',
-                        prazo: row[5] || '',
-                        progresso: parseFloat(row[6]) || 0,
-                        horas: parseInt(row[7]) || 0
-                    }));
-            }
-            
-            // Renderizar dados atualizados
-            updateProcessoInfo();
-            renderEtapas();
-            renderTarefas();
-            calcularKPIs();
-            updateCharts();
-            
-            console.log('✅ Dados carregados do Google Sheets:', new Date().toLocaleTimeString());
-            showNotification('✅ Dados atualizados com sucesso!', 'success');
-            
-        } else {
-            console.warn('⚠️ Nenhum dado encontrado na planilha');
-            loadLocalData();
         }
         
-        showLoading(false);
+        // Buscar dados das tarefas
+        const tarefasResponse = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+            range: ranges.tarefas
+        });
+        
+        if (tarefasResponse.result.values && tarefasResponse.result.values.length > 0) {
+            processo.tarefas = tarefasResponse.result.values
+                .filter(row => row[1] && row[1].trim() !== '')
+                .map(row => ({
+                    etapa: row[0] || '',
+                    nome: row[1] || '',
+                    status: row[2] || 'Não iniciada',
+                    responsavel: row[3] || '',
+                    prioridade: row[4] || 'Média',
+                    prazo: row[5] || '',
+                    progresso: parseFloat(row[6]) || 0,
+                    horas: parseInt(row[7]) || 0
+                }));
+        }
+        
+        todosProcessos.push(processo);
+        console.log(`✅ Processo carregado: ${nomeProcesso}`);
         
     } catch (error) {
-        console.error('❌ Erro ao carregar dados do Google Sheets:', error);
-        
-        // Log completo do erro para debug
-        if (error.result && error.result.error) {
-            console.error('📋 Detalhes do erro da API:');
-            console.error('   Código:', error.result.error.code);
-            console.error('   Mensagem:', error.result.error.message);
-            console.error('   Status:', error.result.error.status);
-            if (error.result.error.details) {
-                console.error('   Detalhes:', error.result.error.details);
-            }
-        }
-        
-        // Mensagem de erro mais detalhada
-        let errorMsg = 'Erro ao carregar dados da planilha';
-        if (error.result && error.result.error) {
-            const apiError = error.result.error;
-            if (apiError.code === 400) {
-                errorMsg = `Erro 400: ${apiError.message || 'Verifique o nome da aba e estrutura da planilha'}`;
-            } else if (apiError.code === 403) {
-                errorMsg = 'Planilha sem permissão de acesso (torne pública)';
-            } else if (apiError.code === 404) {
-                errorMsg = 'Planilha não encontrada - verifique o Spreadsheet ID';
-            } else {
-                errorMsg = `Erro ${apiError.code}: ${apiError.message}`;
-            }
-        }
-        
-        showNotification('❌ ' + errorMsg, 'error');
-        showLoading(false);
-        loadLocalData();
+        console.error(`❌ Erro ao carregar ${nomeProcesso}:`, error);
+        throw error;
     }
+}
+
+// ==================== RENDERIZAR TODOS OS PROCESSOS ====================
+function renderTodosProcessos() {
+    const commandCenter = document.getElementById('command-center');
+    if (!commandCenter) return;
+    
+    // Encontrar container de cards ou criar
+    let cardsContainer = commandCenter.querySelector('.processos-container');
+    if (!cardsContainer) {
+        const title = commandCenter.querySelector('.section-title');
+        cardsContainer = document.createElement('div');
+        cardsContainer.className = 'processos-container';
+        title.after(cardsContainer);
+    }
+    
+    cardsContainer.innerHTML = '';
+    
+    todosProcessos.forEach((proc, index) => {
+        const card = criarCardProcesso(proc, index);
+        cardsContainer.appendChild(card);
+    });
+    
+    // Atualizar primeiro processo na aba detalhada (compatibilidade)
+    if (todosProcessos.length > 0) {
+        processoData = todosProcessos[0];
+        updateProcessoInfo();
+        renderEtapas();
+        renderTarefas();
+    }
+}
+
+function criarCardProcesso(proc, index) {
+    const card = document.createElement('div');
+    card.className = 'processo-card';
+    card.setAttribute('data-processo', index + 1);
+    
+    // Calcular métricas
+    let progressoTotal = 0;
+    if (proc.etapas.length > 0) {
+        proc.etapas.forEach(etapa => {
+            progressoTotal += (etapa.progresso || 0) * (etapa.peso || 0.15);
+        });
+    }
+    const progressoPct = Math.round(progressoTotal * 100);
+    
+    const concluidas = proc.etapas.filter(e => e.status === 'Concluída').length;
+    const emExec = proc.etapas.filter(e => e.status === 'Em execução').length;
+    const totalEtapas = proc.etapas.length;
+    
+    let statusGeral = 'Não iniciada';
+    let statusClass = 'status-pendente';
+    if (concluidas === totalEtapas && totalEtapas > 0) {
+        statusGeral = 'Concluída';
+        statusClass = 'status-concluida';
+    } else if (emExec > 0) {
+        statusGeral = 'Em execução';
+        statusClass = 'status-em-execucao';
+    } else if (concluidas > 0) {
+        statusGeral = 'Em andamento';
+        statusClass = 'status-em-andamento';
+    }
+    
+    // Calcular duração
+    let duracao = '-';
+    if (proc.dataInicio && proc.dataTermino) {
+        const inicio = new Date(proc.dataInicio);
+        const termino = new Date(proc.dataTermino);
+        const dias = Math.ceil((termino - inicio) / (1000 * 60 * 60 * 24));
+        if (!isNaN(dias)) duracao = dias + ' dias';
+    }
+    
+    // Pegar responsáveis únicos
+    const responsaveis = [...new Set(proc.etapas.map(e => e.responsavel).filter(r => r))].join(', ') || 'Não definido';
+    
+    card.innerHTML = `
+        <div class="card-header" style="background: linear-gradient(135deg, #1F4E78 0%, #366092 100%)">
+            <div class="card-title">
+                <span class="processo-id">#${index + 1}</span>
+                <h3>${proc.descricao || proc.nome}</h3>
+            </div>
+            <div class="card-actions">
+                <button class="btn-expand" onclick="expandProcesso(${index + 1})">
+                    <i class="fas fa-chevron-down"></i> Expandir Detalhes
+                </button>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="card-metrics">
+                <div class="metric">
+                    <span class="metric-label">Status</span>
+                    <span class="status-badge ${statusClass}">${statusGeral}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">% Conclusão</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressoPct}%">${progressoPct}%</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Etapas</span>
+                    <span class="metric-value">${concluidas}/${totalEtapas} <i class="fas fa-tasks"></i></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Responsáveis</span>
+                    <span class="metric-value">${responsaveis}</span>
+                </div>
+            </div>
+            
+            <div class="card-timeline">
+                <div class="timeline-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span><strong>Início:</strong> ${proc.dataInicio || '-'}</span>
+                </div>
+                <div class="timeline-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span><strong>Término:</strong> ${proc.dataTermino || '-'}</span>
+                </div>
+                <div class="timeline-item">
+                    <i class="fas fa-clock"></i>
+                    <span><strong>Duração:</strong> ${duracao}</span>
+                </div>
+                <div class="timeline-item">
+                    <i class="fas fa-layer-group"></i>
+                    <span><strong>Categoria:</strong> ${proc.categoria || '-'}</span>
+                </div>
+            </div>
+            
+            <div class="card-indicators">
+                <div class="indicator">
+                    <span class="indicator-label">Prioridade</span>
+                    <span class="badge badge-${proc.prioridade?.toLowerCase() || 'media'}">${proc.prioridade || 'Média'}</span>
+                </div>
+                <div class="indicator">
+                    <span class="indicator-label">SEI</span>
+                    <span class="indicator-value">${proc.sei || '-'}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-expanded" id="processo-${index + 1}-details" style="display: none;">
+            <div class="expanded-content">
+                <h4><i class="fas fa-info-circle"></i> Etapas Resumidas</h4>
+                <div class="etapas-mini">
+                    ${proc.etapas.map(etapa => `
+                        <div class="etapa-mini etapa-${etapa.status.toLowerCase().replace(' ', '-')}">
+                            <span class="etapa-nome">${etapa.nome}</span>
+                            <span class="etapa-progress">${Math.round((etapa.progresso || 0) * 100)}%</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return card;
 }
 
 // ==================== SALVAR DADOS NO GOOGLE SHEETS ====================
@@ -916,6 +1064,89 @@ function updateCharts() {
         
         progressChart.data.datasets[0].data = processoData.etapas.map(e => e.progresso * 100);
         progressChart.update();
+    }
+}
+
+function calcularKPIsGlobais() {
+    if (todosProcessos.length === 0) {
+        return calcularKPIs(); // Fallback para dados locais
+    }
+    
+    let totalProcessos = todosProcessos.length;
+    let processosAtivos = 0;
+    let processosConcluidos = 0;
+    let processosPlanejados = 0;
+    let processosAtrasados = 0;
+    let somaProgresso = 0;
+    let somaDias = 0;
+    
+    todosProcessos.forEach(proc => {
+        // Calcular progresso do processo
+        let progressoProcesso = 0;
+        if (proc.etapas.length > 0) {
+            proc.etapas.forEach(etapa => {
+                progressoProcesso += (etapa.progresso || 0) * (etapa.peso || 0.15);
+            });
+        }
+        
+        somaProgresso += progressoProcesso;
+        
+        // Contar etapas por status
+        const emExec = proc.etapas.filter(e => e.status === 'Em execução').length;
+        const concluidas = proc.etapas.filter(e => e.status === 'Concluída').length;
+        const naoIniciadas = proc.etapas.filter(e => e.status === 'Não iniciada').length;
+        
+        if (emExec > 0) processosAtivos++;
+        if (concluidas === proc.etapas.length && proc.etapas.length > 0) processosConcluidos++;
+        if (naoIniciadas === proc.etapas.length && proc.etapas.length > 0) processosPlanejados++;
+        
+        // Calcular dias
+        if (proc.dataInicio && proc.dataTermino) {
+            const inicio = new Date(proc.dataInicio);
+            const termino = new Date(proc.dataTermino);
+            const dias = Math.ceil((termino - inicio) / (1000 * 60 * 60 * 24));
+            if (!isNaN(dias)) somaDias += dias;
+        }
+    });
+    
+    const progressoMedio = totalProcessos > 0 ? Math.round((somaProgresso / totalProcessos) * 100) : 0;
+    const prazoMedio = totalProcessos > 0 ? Math.round(somaDias / totalProcessos) : 0;
+    
+    // Atualizar KPIs
+    const kpiTotal = document.getElementById('kpi-total');
+    const kpiAtivos = document.getElementById('kpi-ativos');
+    const kpiConcluidos = document.getElementById('kpi-concluidos');
+    const kpiPlanejados = document.getElementById('kpi-planejados');
+    const kpiAtrasados = document.getElementById('kpi-atrasados');
+    const kpiProgresso = document.getElementById('kpi-progresso');
+    const kpiPrazo = document.getElementById('kpi-prazo');
+    
+    if (kpiTotal) kpiTotal.textContent = totalProcessos;
+    if (kpiAtivos) kpiAtivos.textContent = processosAtivos;
+    if (kpiConcluidos) kpiConcluidos.textContent = processosConcluidos;
+    if (kpiPlanejados) kpiPlanejados.textContent = processosPlanejados;
+    if (kpiAtrasados) kpiAtrasados.textContent = processosAtrasados;
+    if (kpiProgresso) kpiProgresso.textContent = progressoMedio + '%';
+    if (kpiPrazo) kpiPrazo.textContent = prazoMedio + 'd';
+    
+    // Atualizar alertas
+    const alertsDiv = document.getElementById('alerts-container');
+    if (alertsDiv) {
+        alertsDiv.innerHTML = '';
+        
+        if (processosAtivos > 0) {
+            alertsDiv.innerHTML += `<div class="alert alert-warning">🟡 ATENÇÃO: ${processosAtivos} processo(s) em execução</div>`;
+        }
+        
+        if (processosConcluidos > 0) {
+            alertsDiv.innerHTML += `<div class="alert alert-success">🟢 SUCESSO: ${processosConcluidos} processo(s) concluído(s)!</div>`;
+        }
+        
+        if (progressoMedio >= 70) {
+            alertsDiv.innerHTML += '<div class="alert alert-success">🟢 Progresso geral excelente!</div>';
+        } else if (progressoMedio < 30) {
+            alertsDiv.innerHTML += '<div class="alert alert-warning">🟡 Progresso geral baixo - atenção necessária</div>';
+        }
     }
 }
 
