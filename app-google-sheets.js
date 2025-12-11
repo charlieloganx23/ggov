@@ -241,7 +241,17 @@ async function loadProcessoData(nomeProcesso) {
         
         if (etapasResponse.result.values && etapasResponse.result.values.length > 0) {
             processo.etapas = etapasResponse.result.values
-                .filter(row => row[0] && row[0].trim() !== '')
+                .filter(row => {
+                    // Filtrar linhas vazias
+                    if (!row[0] || row[0].trim() === '') return false;
+                    
+                    // IMPORTANTE: Parar de ler quando encontrar "Etapa" (cabeçalho da seção de tarefas)
+                    // Isso garante que só pegamos as etapas reais do processo
+                    const nome = row[0].trim();
+                    if (nome.toLowerCase() === 'etapa') return false;
+                    
+                    return true;
+                })
                 .map(row => ({
                     // Campos originais (A-K)
                     nome: row[0] || '',
