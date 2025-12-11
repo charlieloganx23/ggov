@@ -477,9 +477,12 @@ function criarConteudoAbaProcesso(proc, index) {
     section.id = processoId;
     section.className = 'tab-content';
     
+    // Título da aba: usa descrição se disponível, senão usa nome da aba
+    const tituloProcesso = proc.descricao || proc.nome || `Processo ${processoNum}`;
+    
     section.innerHTML = `
         <div class="processo-header">
-            <h2 class="processo-title">📂 ${proc.nome || `PROCESSO ${processoNum}`}: ${proc.descricao || 'Sem descrição'}</h2>
+            <h2 class="processo-title">📂 ${tituloProcesso}</h2>
         </div>
 
         <div class="projeto-info">
