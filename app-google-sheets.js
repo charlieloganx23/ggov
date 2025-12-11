@@ -255,6 +255,9 @@ function renderTodosProcessos() {
         cardsContainer.appendChild(card);
     });
     
+    // Criar abas de navegação e conteúdo para cada processo
+    criarAbasProcessos();
+    
     // Atualizar primeiro processo na aba detalhada (compatibilidade)
     if (todosProcessos.length > 0) {
         processoData = todosProcessos[0];
@@ -389,6 +392,212 @@ function criarCardProcesso(proc, index) {
     `;
     
     return card;
+}
+
+// ==================== CRIAR ABAS DINÂMICAS PARA PROCESSOS ====================
+function criarAbasProcessos() {
+    const tabsNav = document.getElementById('tabs-navigation');
+    const dashboard Btn = tabsNav.querySelector('[data-tab="dashboard"]');
+    const container = document.getElementById('processos-tabs-container');
+    
+    if (!tabsNav || !container) return;
+    
+    // Remover abas antigas de processos
+    tabsNav.querySelectorAll('.tab-btn-processo').forEach(btn => btn.remove());
+    container.innerHTML = '';
+    
+    // Criar aba e conteúdo para cada processo
+    todosProcessos.forEach((proc, index) => {
+        const processoId = `processo-${index + 1}`;
+        const processoNum = index + 1;
+        
+        // Criar botão de aba
+        const tabBtn = document.createElement('button');
+        tabBtn.className = 'tab-btn tab-btn-processo';
+        tabBtn.setAttribute('data-tab', processoId);
+        tabBtn.innerHTML = `📂 ${proc.nome || `Processo ${processoNum}`}`;
+        tabBtn.onclick = () => switchTab(processoId);
+        
+        // Inserir antes do Dashboard
+        dashboardBtn.before(tabBtn);
+        
+        // Criar conteúdo da aba
+        const tabContent = criarConteudoAbaProcesso(proc, index);
+        container.appendChild(tabContent);
+    });
+}
+
+function criarConteudoAbaProcesso(proc, index) {
+    const processoId = `processo-${index + 1}`;
+    const processoNum = index + 1;
+    
+    // Calcular métricas
+    let progressoTotal = 0;
+    if (proc.etapas.length > 0) {
+        proc.etapas.forEach(etapa => {
+            progressoTotal += (etapa.progresso || 0) * (etapa.peso || 0.15);
+        });
+    }
+    const progressoPct = Math.round(progressoTotal * 100);
+    
+    const concluidas = proc.etapas.filter(e => e.status === 'Concluída').length;
+    const emExec = proc.etapas.filter(e => e.status === 'Em execução').length;
+    const totalEtapas = proc.etapas.length;
+    
+    let statusGeral = 'Não iniciada';
+    if (concluidas === totalEtapas && totalEtapas > 0) {
+        statusGeral = 'Concluída';
+    } else if (emExec > 0) {
+        statusGeral = 'Em execução';
+    } else if (concluidas > 0) {
+        statusGeral = 'Em andamento';
+    }
+    
+    // Calcular duração
+    let duracao = '-';
+    if (proc.dataInicio && proc.dataTermino) {
+        const inicio = new Date(proc.dataInicio);
+        const termino = new Date(proc.dataTermino);
+        const dias = Math.ceil((termino - inicio) / (1000 * 60 * 60 * 24));
+        if (!isNaN(dias)) duracao = dias + ' dias';
+    }
+    
+    const section = document.createElement('section');
+    section.id = processoId;
+    section.className = 'tab-content';
+    
+    section.innerHTML = `
+        <div class="processo-header">
+            <h2 class="processo-title">📂 ${proc.nome || `PROCESSO ${processoNum}`}: ${proc.descricao || 'Sem descrição'}</h2>
+        </div>
+
+        <div class="projeto-info">
+            <h3 class="subsection-title">📋 INFORMAÇÕES DO PROJETO</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">SEI:</span>
+                    <span class="info-value">${proc.sei || '-'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Prioridade:</span>
+                    <span class="badge badge-${proc.prioridade?.toLowerCase() || 'media'}">${proc.prioridade || 'Média'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Categoria:</span>
+                    <span class="info-value">${proc.categoria || '-'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status Geral:</span>
+                    <span class="status-badge status-${statusGeral.toLowerCase().replace(' ', '-')}">${statusGeral}</span>
+                </div>
+                <div class="info-item highlight">
+                    <span class="info-label">% Conclusão:</span>
+                    <span class="info-value-big">${progressoPct}%</span>
+                </div>
+            </div>
+            
+            <div class="info-grid mt-2">
+                <div class="info-item">
+                    <span class="info-label">Data Início:</span>
+                    <span class="info-value">${proc.dataInicio || '-'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Data Término:</span>
+                    <span class="info-value">${proc.dataTermino || '-'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Duração:</span>
+                    <span class="info-value">${duracao}</span>
+                </div>
+            </div>
+
+            <div class="descricao-box">
+                <strong>Descrição:</strong>
+                <p>${proc.descricao || 'Sem descrição disponível'}</p>
+            </div>
+        </div>
+
+        <div class="etapas-section">
+            <h3 class="subsection-title">🔄 ETAPAS DO PROCESSO - DETALHAMENTO COMPLETO</h3>
+            <p class="hint">💡 Total de ${totalEtapas} etapa(s) - ${concluidas} concluída(s), ${emExec} em execução</p>
+            
+            <div class="table-responsive">
+                <table class="etapas-table">
+                    <thead>
+                        <tr>
+                            <th>Etapa</th>
+                            <th>Status</th>
+                            <th>Responsável</th>
+                            <th>Dt. Início</th>
+                            <th>Dt. Término</th>
+                            <th>Produtos/Entregas</th>
+                            <th>% Progresso</th>
+                            <th>Horas</th>
+                            <th>Peso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${proc.etapas.map(etapa => `
+                            <tr>
+                                <td><strong>${etapa.nome}</strong></td>
+                                <td><span class="status-badge status-${etapa.status.toLowerCase().replace(' ', '-')}">${etapa.status}</span></td>
+                                <td>${etapa.responsavel || '-'}</td>
+                                <td>${etapa.dataInicio || '-'}</td>
+                                <td>${etapa.dataTermino || '-'}</td>
+                                <td>${etapa.produtos || '-'}</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${(etapa.progresso || 0) * 100}%">
+                                            ${Math.round((etapa.progresso || 0) * 100)}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${etapa.horasEstimadas || 0}h</td>
+                                <td>${((etapa.peso || 0) * 100).toFixed(0)}%</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tarefas-section">
+            <h3 class="subsection-title">📝 TAREFAS DETALHADAS POR ETAPA</h3>
+            
+            <div class="table-responsive">
+                <table class="tarefas-table">
+                    <thead>
+                        <tr>
+                            <th>Etapa</th>
+                            <th>Tarefa</th>
+                            <th>Status</th>
+                            <th>Responsável</th>
+                            <th>Prioridade</th>
+                            <th>Prazo</th>
+                            <th>% Conclusão</th>
+                            <th>Horas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${proc.tarefas.map(tarefa => `
+                            <tr>
+                                <td>${tarefa.etapa || '-'}</td>
+                                <td><strong>${tarefa.nome}</strong></td>
+                                <td><span class="status-badge status-${tarefa.status.toLowerCase().replace(' ', '-')}">${tarefa.status}</span></td>
+                                <td>${tarefa.responsavel || '-'}</td>
+                                <td><span class="badge badge-${tarefa.prioridade?.toLowerCase() || 'media'}">${tarefa.prioridade || 'Média'}</span></td>
+                                <td>${tarefa.prazo || '-'}</td>
+                                <td>${Math.round((tarefa.progresso || 0) * 100)}%</td>
+                                <td>${tarefa.horas || 0}h</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    
+    return section;
 }
 
 // ==================== SALVAR DADOS NO GOOGLE SHEETS ====================

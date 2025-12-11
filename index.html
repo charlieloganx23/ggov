@@ -62,10 +62,10 @@
             </div>
         </section>
 
-        <!-- NAVEGAÇÃO DE ABAS -->
-        <div class="tabs-navigation">
+        <!-- NAVEGAÇÃO DE ABAS - Abas de processos criadas dinamicamente -->
+        <div class="tabs-navigation" id="tabs-navigation">
             <button class="tab-btn active" data-tab="command-center">🎯 Command Center</button>
-            <button class="tab-btn" data-tab="processo-1">📂 Processo 1</button>
+            <!-- Abas de processos inseridas aqui dinamicamente -->
             <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
         </div>
 
@@ -77,8 +77,11 @@
             <div class="processos-container"></div>
         </section>
 
-        <!-- TAB: PROCESSO 1 -->
-        <section id="processo-1" class="tab-content">
+        <!-- ABAS DE PROCESSOS - Criadas dinamicamente pelo JavaScript -->
+        <div id="processos-tabs-container"></div>
+
+        <!-- TAB: DASHBOARD -->
+        <section id="dashboard" class="tab-content">
             <div class="processo-header">
                 <h2 class="processo-title">📂 PROCESSO 1: Mapeamento dos processos do Gabinete de Governança</h2>
             </div>
