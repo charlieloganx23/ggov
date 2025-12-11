@@ -307,11 +307,23 @@ function criarCardProcesso(proc, index) {
         if (!isNaN(dias)) duracao = dias + ' dias';
     }
     
-    // Pegar responsáveis únicos
-    const responsaveis = [...new Set(proc.etapas.map(e => e.responsavel).filter(r => r))].join(', ') || 'Não definido';
+    // Pegar responsáveis únicos (apenas valores válidos)
+    const responsaveis = [...new Set(
+        proc.etapas
+            .map(e => e.responsavel)
+            .filter(r => r && r.trim() !== '' && r !== '-')
+    )].join(', ') || 'Não definido';
     
-    // Título do card: usa descrição se disponível, senão usa nome da aba
-    const tituloCard = proc.descricao || proc.nome || `Processo ${index + 1}`;
+    // Título do card: prioriza nome da aba se tiver, senão descrição
+    let tituloCard = proc.nome || `Processo ${index + 1}`;
+    // Remove "Processo:" se existir
+    if (tituloCard.includes('Processo:')) {
+        tituloCard = tituloCard.split('Processo:')[1].trim();
+    }
+    // Se não houver nome descritivo, usa a descrição
+    if (tituloCard === `Processo ${index + 1}` && proc.descricao) {
+        tituloCard = proc.descricao;
+    }
     
     card.innerHTML = `
         <div class="card-header" style="background: linear-gradient(135deg, #1F4E78 0%, #366092 100%)">
