@@ -1610,7 +1610,7 @@ function filtrarTarefas() {
     });
 }
 
-let statusChart, progressChart;
+let statusChart, progressChart, processosChart, responsaveisChart;
 
 function initCharts() {
     const statusCtx = document.getElementById('statusChart');
@@ -1627,17 +1627,47 @@ function initCharts() {
         progressChart.destroy();
         progressChart = null;
     }
+    if (processosChart) {
+        processosChart.destroy();
+        processosChart = null;
+    }
+    if (responsaveisChart) {
+        responsaveisChart.destroy();
+        responsaveisChart = null;
+    }
     
+    // Consolidar dados de TODOS os processos
     const statusCount = {
         'Em execução': 0,
         'Concluída': 0,
         'Não iniciada': 0
     };
     
-    processoData.etapas.forEach(etapa => {
-        statusCount[etapa.status]++;
+    const processoProgressos = [];
+    const processoNomes = [];
+    
+    todosProcessos.forEach((proc, idx) => {
+        // Contar status de todas as etapas
+        proc.etapas.forEach(etapa => {
+            const status = etapa.status;
+            if (status in statusCount) {
+                statusCount[status]++;
+            }
+        });
+        
+        // Calcular progresso do processo
+        let progressoProcesso = 0;
+        if (proc.etapas.length > 0) {
+            proc.etapas.forEach(etapa => {
+                progressoProcesso += (etapa.progresso || 0) * (etapa.peso || 0.15);
+            });
+        }
+        
+        processoProgressos.push(Math.round(progressoProcesso * 100));
+        processoNomes.push(proc.nome || proc.descricao?.substring(0, 25) || `Processo ${idx + 1}`);
     });
     
+    // Gráfico de Status das Etapas (Doughnut)
     statusChart = new Chart(statusCtx.getContext('2d'), {
         type: 'doughnut',
         data: {
@@ -1650,47 +1680,222 @@ function initCharts() {
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            plugins: { legend: { position: 'bottom' } }
+            plugins: { 
+                legend: { position: 'bottom' },
+                title: { display: true, text: 'Consolidado de Todas as Etapas' }
+            }
         }
     });
     
+    // Gráfico de Progresso por Processo (Bar horizontal)
     progressChart = new Chart(progressCtx.getContext('2d'), {
         type: 'bar',
         data: {
-            labels: processoData.etapas.map(e => e.nome.substring(0, 20) + '...'),
+            labels: processoNomes,
             datasets: [{
                 label: '% Progresso',
-                data: processoData.etapas.map(e => e.progresso * 100),
-                backgroundColor: '#4472C4'
+                data: processoProgressos,
+                backgroundColor: processoProgressos.map(p => 
+                    p >= 70 ? '#70AD47' : p >= 40 ? '#FFA500' : '#C00000'
+                )
             }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: true,
-            scales: { y: { beginAtZero: true, max: 100 } },
-            plugins: { legend: { display: false } }
+            scales: { 
+                x: { beginAtZero: true, max: 100 } 
+            },
+            plugins: { 
+                legend: { display: false },
+                title: { display: true, text: 'Progresso por Processo' }
+            }
         }
     });
+    
+    // Criar gráficos adicionais
+    criarGraficosAdicionais();
+}
+
+function criarGraficosAdicionais() {
+    // Gráfico de Responsáveis
+    const responsaveisCtx = document.getElementById('responsaveisChart');
+    if (responsaveisCtx) {
+        const responsaveisMap = {};
+        todosProcessos.forEach(proc => {
+            proc.etapas.forEach(etapa => {
+                const resp = etapa.responsavel || 'Não atribuído';
+                responsaveisMap[resp] = (responsaveisMap[resp] || 0) + 1;
+            });
+        });
+        
+        if (responsaveisChart) responsaveisChart.destroy();
+        responsaveisChart = new Chart(responsaveisCtx.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(responsaveisMap),
+                datasets: [{
+                    data: Object.values(responsaveisMap),
+                    backgroundColor: ['#4472C4', '#FFA500', '#70AD47', '#C00000', '#9B59B6', '#5B9BD5']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'right' } }
+            }
+        });
+    }
+    
+    // Gráfico de Timeline
+    const timelineCtx = document.getElementById('timelineChart');
+    if (timelineCtx) {
+        const processosComData = todosProcessos.filter(p => p.dataInicio && p.dataTermino);
+        
+        const datasets = processosComData.map((proc, idx) => {
+            const inicio = new Date(proc.dataInicio).getTime();
+            const termino = new Date(proc.dataTermino).getTime();
+            const hoje = new Date().getTime();
+            
+            return {
+                label: proc.nome || proc.descricao?.substring(0, 20) || `Processo ${idx + 1}`,
+                data: [{
+                    x: [inicio, termino],
+                    y: proc.nome || `P${idx + 1}`
+                }],
+                backgroundColor: hoje > termino ? '#C00000' : hoje > inicio ? '#FFA500' : '#5B9BD5'
+            };
+        });
+        
+        new Chart(timelineCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: processosComData.map((p, i) => p.nome || `Processo ${i + 1}`),
+                datasets: [{
+                    label: 'Duração',
+                    data: processosComData.map(p => {
+                        const inicio = new Date(p.dataInicio);
+                        const termino = new Date(p.dataTermino);
+                        return Math.ceil((termino - inicio) / (1000 * 60 * 60 * 24));
+                    }),
+                    backgroundColor: '#4472C4'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+    
+    // Gráfico de Prioridades
+    const prioridadesCtx = document.getElementById('prioridadesChart');
+    if (prioridadesCtx) {
+        const prioridadesMap = { 'Alta': 0, 'Média': 0, 'Baixa': 0 };
+        todosProcessos.forEach(proc => {
+            const prio = proc.prioridade || 'Média';
+            if (prio in prioridadesMap) {
+                prioridadesMap[prio]++;
+            }
+        });
+        
+        new Chart(prioridadesCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(prioridadesMap),
+                datasets: [{
+                    data: Object.values(prioridadesMap),
+                    backgroundColor: ['#C00000', '#FFA500', '#70AD47']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { 
+                    legend: { position: 'bottom' },
+                    title: { display: true, text: 'Distribuição por Prioridade' }
+                }
+            }
+        });
+    }
+    
+    // Atualizar estatísticas consolidadas
+    atualizarEstatisticasConsolidadas();
+}
+
+function atualizarEstatisticasConsolidadas() {
+    let totalEtapas = 0;
+    let etapasConcluidas = 0;
+    let horasPlanejadasTotal = 0;
+    let horasReaisTotal = 0;
+    
+    todosProcessos.forEach(proc => {
+        totalEtapas += proc.etapas.length;
+        
+        proc.etapas.forEach(etapa => {
+            if ((etapa.status || '').toLowerCase().includes('conclu')) {
+                etapasConcluidas++;
+            }
+            horasPlanejadasTotal += parseFloat(etapa.horasEstimadas) || 0;
+            horasReaisTotal += parseFloat(etapa.horasReais) || 0;
+        });
+    });
+    
+    const taxaConclusao = totalEtapas > 0 ? Math.round((etapasConcluidas / totalEtapas) * 100) : 0;
+    const eficiencia = horasPlanejadasTotal > 0 ? Math.round((horasPlanejadasTotal / horasReaisTotal) * 100) : 0;
+    const velocidade = etapasConcluidas > 0 && todosProcessos.length > 0 ? 
+        (etapasConcluidas / todosProcessos.length).toFixed(1) : 0;
+    
+    document.getElementById('stat-total-etapas').textContent = totalEtapas;
+    document.getElementById('stat-taxa-conclusao').textContent = taxaConclusao + '%';
+    document.getElementById('stat-horas-planejadas').textContent = horasPlanejadasTotal.toFixed(0) + 'h';
+    document.getElementById('stat-horas-executadas').textContent = horasReaisTotal.toFixed(0) + 'h';
+    document.getElementById('stat-eficiencia').textContent = eficiencia + '%';
+    document.getElementById('stat-velocidade').textContent = velocidade + ' etapas/proc';
 }
 
 function updateCharts() {
-    if (statusChart && progressChart) {
-        const statusCount = {
-            'Em execução': 0,
-            'Concluída': 0,
-            'Não iniciada': 0
-        };
-        
-        processoData.etapas.forEach(etapa => {
-            statusCount[etapa.status]++;
+    if (!statusChart || !progressChart || todosProcessos.length === 0) return;
+    
+    // Atualizar contagem de status
+    const statusCount = {
+        'Em execução': 0,
+        'Concluída': 0,
+        'Não iniciada': 0
+    };
+    
+    const processoProgressos = [];
+    
+    todosProcessos.forEach(proc => {
+        proc.etapas.forEach(etapa => {
+            const status = etapa.status;
+            if (status in statusCount) {
+                statusCount[status]++;
+            }
         });
         
-        statusChart.data.datasets[0].data = Object.values(statusCount);
-        statusChart.update();
-        
-        progressChart.data.datasets[0].data = processoData.etapas.map(e => e.progresso * 100);
-        progressChart.update();
-    }
+        // Calcular progresso do processo
+        let progressoProcesso = 0;
+        if (proc.etapas.length > 0) {
+            proc.etapas.forEach(etapa => {
+                progressoProcesso += (etapa.progresso || 0) * (etapa.peso || 0.15);
+            });
+        }
+        processoProgressos.push(Math.round(progressoProcesso * 100));
+    });
+    
+    // Atualizar gráficos
+    statusChart.data.datasets[0].data = Object.values(statusCount);
+    statusChart.update();
+    
+    progressChart.data.datasets[0].data = processoProgressos;
+    progressChart.data.datasets[0].backgroundColor = processoProgressos.map(p => 
+        p >= 70 ? '#70AD47' : p >= 40 ? '#FFA500' : '#C00000'
+    );
+    progressChart.update();
 }
 
 function calcularKPIsGlobais() {

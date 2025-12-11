@@ -85,58 +85,70 @@
             <h2 class="section-title">📊 DASHBOARD ANALÍTICO - INTELIGÊNCIA DE PROCESSOS</h2>
             
             <div class="dashboard-grid">
+                <!-- Gráfico 1: Status das Etapas -->
                 <div class="chart-card">
-                    <h3>Distribuição de Status das Etapas</h3>
+                    <h3><i class="fas fa-chart-pie"></i> Status de Todas as Etapas</h3>
+                    <p class="chart-subtitle">Consolidado geral de status</p>
                     <canvas id="statusChart"></canvas>
                 </div>
                 
+                <!-- Gráfico 2: Progresso por Processo -->
                 <div class="chart-card">
-                    <h3>Progresso por Etapa</h3>
+                    <h3><i class="fas fa-chart-bar"></i> Progresso por Processo</h3>
+                    <p class="chart-subtitle">Comparativo de avanço entre processos</p>
                     <canvas id="progressChart"></canvas>
                 </div>
                 
+                <!-- Gráfico 3: Distribuição por Responsável -->
+                <div class="chart-card">
+                    <h3><i class="fas fa-users"></i> Distribuição por Responsável</h3>
+                    <p class="chart-subtitle">Carga de trabalho por pessoa</p>
+                    <canvas id="responsaveisChart"></canvas>
+                </div>
+                
+                <!-- Gráfico 4: Evolução Temporal -->
+                <div class="chart-card">
+                    <h3><i class="fas fa-calendar-alt"></i> Timeline de Processos</h3>
+                    <p class="chart-subtitle">Linha do tempo de início e término</p>
+                    <canvas id="timelineChart"></canvas>
+                </div>
+                
+                <!-- Card 5: Estatísticas Gerais -->
                 <div class="stats-card">
-                    <h3>KPIs do Processo</h3>
-                    <div class="stats-grid">
+                    <h3><i class="fas fa-tachometer-alt"></i> Estatísticas Consolidadas</h3>
+                    <div class="stats-grid" id="stats-consolidadas">
                         <div class="stat-item">
                             <div class="stat-label">Total Etapas</div>
-                            <div class="stat-value" style="color: #4472C4">6</div>
+                            <div class="stat-value" id="stat-total-etapas" style="color: #4472C4">-</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-label">Taxa Conclusão</div>
-                            <div class="stat-value" style="color: #70AD47">43%</div>
+                            <div class="stat-value" id="stat-taxa-conclusao" style="color: #70AD47">-</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-label">Horas Planejadas</div>
-                            <div class="stat-value" style="color: #FFA500">480h</div>
+                            <div class="stat-value" id="stat-horas-planejadas" style="color: #FFA500">-</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-label">Horas Executadas</div>
-                            <div class="stat-value" style="color: #C00000">128h</div>
+                            <div class="stat-value" id="stat-horas-executadas" style="color: #C00000">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Eficiência Média</div>
+                            <div class="stat-value" id="stat-eficiencia" style="color: #9B59B6">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Velocidade Média</div>
+                            <div class="stat-value" id="stat-velocidade" style="color: #5B9BD5">-</div>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Card 6: Heatmap de Prioridades -->
                 <div class="chart-card">
-                    <h3>Timeline de Execução</h3>
-                    <div class="gantt-mini">
-                        <div class="gantt-row">
-                            <span class="gantt-label">Levantamento</span>
-                            <div class="gantt-bar" style="width: 70%; background: #70AD47"></div>
-                        </div>
-                        <div class="gantt-row">
-                            <span class="gantt-label">Mapeamento</span>
-                            <div class="gantt-bar" style="width: 60%; background: #FFA500"></div>
-                        </div>
-                        <div class="gantt-row">
-                            <span class="gantt-label">Análise</span>
-                            <div class="gantt-bar" style="width: 0%; background: #E0E0E0"></div>
-                        </div>
-                        <div class="gantt-row">
-                            <span class="gantt-label">Documentação</span>
-                            <div class="gantt-bar" style="width: 0%; background: #E0E0E0"></div>
-                        </div>
-                    </div>
+                    <h3><i class="fas fa-fire"></i> Mapa de Prioridades</h3>
+                    <p class="chart-subtitle">Processos por categoria e urgência</p>
+                    <canvas id="prioridadesChart"></canvas>
                 </div>
             </div>
         </section>
