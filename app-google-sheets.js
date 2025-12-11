@@ -795,7 +795,12 @@ function criarConteudoAbaProcesso(proc, index) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${proc.etapas.map((etapa, etapaIdx) => `
+                            ${proc.etapas.map((etapa, etapaIdx) => {
+                                // Debug: verificar se há conteúdo para mostrar
+                                const temConteudo = !!(etapa.tarefasTexto || etapa.observacoes || etapa.produtos);
+                                console.log(`Etapa ${etapa.nome}: temConteudo=${temConteudo}, produtos=${!!etapa.produtos}, tarefasTexto=${!!etapa.tarefasTexto}, observacoes=${!!etapa.observacoes}`);
+                                
+                                return `
                                 <tr>
                                     <td><strong>${etapa.nome}</strong></td>
                                     <td><span class="status-badge status-${etapa.status.toLowerCase().replace(' ', '-')}">${etapa.status}</span></td>
@@ -813,12 +818,12 @@ function criarConteudoAbaProcesso(proc, index) {
                                     <td>${etapa.horasEstimadas || 0}h / ${etapa.horasReais || 0}h</td>
                                     <td>${((etapa.peso || 0) * 100).toFixed(0)}%</td>
                                     <td>
-                                        ${etapa.tarefasTexto || etapa.observacoes || etapa.produtos ? 
+                                        ${temConteudo ? 
                                             `<button class="btn-mini" onclick="toggleEtapaDetails(event, '${processoId}-etapa-${etapaIdx}')"><i class="fas fa-chevron-down"></i></button>` 
                                             : '<span style="color: #999">-</span>'}
                                     </td>
                                 </tr>
-                                ${etapa.tarefasTexto || etapa.observacoes || etapa.produtos ? `
+                                ${temConteudo ? `
                                 <tr id="${processoId}-etapa-${etapaIdx}" class="etapa-details" style="display: none;">
                                     <td colspan="10">
                                         <div class="etapa-details-content">
@@ -845,7 +850,8 @@ function criarConteudoAbaProcesso(proc, index) {
                                         </div>
                                     </td>
                                 </tr>` : ''}
-                            `).join('')}
+                            `;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
