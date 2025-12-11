@@ -414,12 +414,17 @@ function criarAbasProcessos() {
         const processoId = `processo-${index + 1}`;
         const processoNum = index + 1;
         
-        // Título curto para a aba (primeiras palavras da descrição ou nome da aba)
+        // Título para a aba de navegação
         let tituloAba = proc.nome || `Processo ${processoNum}`;
-        if (proc.descricao && proc.descricao.length > 0) {
-            // Pega as primeiras 3-4 palavras da descrição
-            const palavras = proc.descricao.split(' ').slice(0, 4).join(' ');
-            tituloAba = palavras.length < proc.descricao.length ? palavras + '...' : palavras;
+        
+        // Se o nome da aba contém "Processo:", pega só o texto depois
+        if (tituloAba.includes('Processo:')) {
+            tituloAba = tituloAba.split('Processo:')[1].trim();
+        }
+        
+        // Se o título for muito longo (>30 caracteres), abrevia
+        if (tituloAba.length > 30) {
+            tituloAba = tituloAba.substring(0, 27) + '...';
         }
         
         // Criar botão de aba
