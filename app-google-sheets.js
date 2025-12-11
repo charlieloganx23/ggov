@@ -153,7 +153,7 @@ async function loadProcessoData(nomeProcesso) {
         const ranges = {
             infoLinha2: `${nomeAbaEscapado}!A2:G2`,
             infoLinha3: `${nomeAbaEscapado}!A3:H3`,
-            infoLinha4: `${nomeAbaEscapado}!A4:G4`,
+            infoLinha4: `${nomeAbaEscapado}!A4:H4`,
             infoLinha5: `${nomeAbaEscapado}!A5:D5`,
             etapas: `${nomeAbaEscapado}!A8:N50`,
             tarefas: `${nomeAbaEscapado}!A17:I100`
@@ -212,11 +212,12 @@ async function loadProcessoData(nomeProcesso) {
         });
         if (info4Response.result.values && info4Response.result.values.length > 0) {
             const row = info4Response.result.values[0];
-            // A4:G4 = Data Início: | data | Data Término: | data | Duração (dias): | dur | Dias Restantes: | dias
+            // A4:H4 = Data Início: | data | Data Término: | data | Duração (dias): | dur | Dias Restantes: | dias
+            // A4 = label, B4 = data inicio, C4 = label, D4 = data termino, E4 = label, F4 = duracao, G4 = label, H4 = dias restantes
             processo.dataInicio = row[1] || '';
             processo.dataTermino = row[3] || '';
             processo.duracaoTotal = row[5] || '';
-            processo.diasRestantes = row[6] || '';
+            processo.diasRestantes = row[7] || ''; // Coluna H (índice 7)
         }
         
         // Buscar informações do projeto - Linha 5
