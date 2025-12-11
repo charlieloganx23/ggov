@@ -154,7 +154,7 @@ async function loadProcessoData(nomeProcesso) {
             infoLinha2: `${nomeAbaEscapado}!A2:G2`,
             infoLinha3: `${nomeAbaEscapado}!A3:H3`,
             infoLinha4: `${nomeAbaEscapado}!A4:G4`,
-            infoLinha5: `${nomeAbaEscapado}!A5:C5`,
+            infoLinha5: `${nomeAbaEscapado}!A5:D5`,
             etapas: `${nomeAbaEscapado}!A8:N50`,
             tarefas: `${nomeAbaEscapado}!A17:I100`
         };
@@ -227,8 +227,9 @@ async function loadProcessoData(nomeProcesso) {
         if (info5Response.result.values && info5Response.result.values.length > 0) {
             const row = info5Response.result.values[0];
             // A5:C5 = Progresso Geral: | % | Status Atual: | status
+            // A5 = label, B5 = progresso, C5 = label "Status Atual:", D5 = valor do status
             processo.progressoGeral = row[1] || '';
-            processo.statusAtual = row[2] || '';
+            processo.statusAtual = row[3] || ''; // Coluna D (índice 3)
         }
         
         // Buscar dados das etapas
@@ -364,7 +365,12 @@ function criarCardProcesso(proc, index) {
     }
     
     // Pegar responsáveis únicos (apenas valores válidos, excluindo status e headers)
-    const valoresInvalidos = ['Status', 'Em execução', 'Concluída', 'Não iniciada', 'Responsável', '-', ''];
+    const valoresInvalidos = [
+        'Status', 'Em execução', 'Concluída', 'Não iniciada', 'Responsável', '-', '',
+        // Variações de status que podem aparecer
+        'Concluído', 'Não iniciado', 'Em andamento', 'Paralisado', 'Paralisada',
+        'Aguardando', 'Bloqueado', 'Bloqueada', 'Cancelado', 'Cancelada'
+    ];
     const responsaveis = [...new Set(
         proc.etapas
             .map(e => e.responsavel)
