@@ -814,7 +814,7 @@ function criarConteudoAbaProcesso(proc, index) {
                                     <td>${((etapa.peso || 0) * 100).toFixed(0)}%</td>
                                     <td>
                                         ${etapa.tarefasTexto || etapa.observacoes || etapa.produtos ? 
-                                            `<button class="btn-mini" onclick="toggleEtapaDetails('${processoId}-etapa-${etapaIdx}')"><i class="fas fa-chevron-down"></i></button>` 
+                                            `<button class="btn-mini" onclick="toggleEtapaDetails(event, '${processoId}-etapa-${etapaIdx}')"><i class="fas fa-chevron-down"></i></button>` 
                                             : '<span style="color: #999">-</span>'}
                                     </td>
                                 </tr>
@@ -912,7 +912,7 @@ function switchSubTab(processoId, subtab) {
 }
 
 // ==================== TOGGLE DE DETALHES DAS ETAPAS ====================
-function toggleEtapaDetails(etapaId) {
+function toggleEtapaDetails(event, etapaId) {
     const detailsRow = document.getElementById(etapaId);
     const btn = event.target.closest('.btn-mini');
     
