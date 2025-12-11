@@ -934,12 +934,12 @@ function calcularKPIs() {
     const kpiAtivos = document.getElementById('kpi-ativos');
     const kpiConcluidos = document.getElementById('kpi-concluidos');
     const kpiPlanejados = document.getElementById('kpi-planejados');
-    const kpiSaude = document.getElementById('kpi-saude');
+    const kpiProgresso = document.getElementById('kpi-progresso');
     
     if (kpiAtivos) kpiAtivos.textContent = emExecucao;
     if (kpiConcluidos) kpiConcluidos.textContent = concluidas;
     if (kpiPlanejados) kpiPlanejados.textContent = naoIniciadas;
-    if (kpiSaude) kpiSaude.textContent = percentualGeral + '%';
+    if (kpiProgresso) kpiProgresso.textContent = percentualGeral + '%';
     
     const alertsDiv = document.getElementById('alerts-container');
     if (alertsDiv) {
