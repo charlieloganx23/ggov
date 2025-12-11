@@ -150,37 +150,84 @@ async function loadProcessoData(nomeProcesso) {
         const nomeAbaEscapado = `'${nomeProcesso.replace(/'/g, "''")}'`;
         
         const ranges = {
-            infoRow: `${nomeAbaEscapado}!A3:F3`,
-            etapas: `${nomeAbaEscapado}!A7:K50`,
+            infoLinha2: `${nomeAbaEscapado}!A2:G2`,
+            infoLinha3: `${nomeAbaEscapado}!A3:H3`,
+            infoLinha4: `${nomeAbaEscapado}!A4:G4`,
+            infoLinha5: `${nomeAbaEscapado}!A5:C5`,
+            etapas: `${nomeAbaEscapado}!A8:N50`,
             tarefas: `${nomeAbaEscapado}!A17:I100`
         };
         
         const processo = {
             nome: nomeProcesso,
+            // Campos originais
             sei: '',
             prioridade: '',
             categoria: '',
             dataInicio: '',
             dataTermino: '',
             descricao: '',
+            // Campos novos da estrutura híbrida
+            unidadeDemandante: '',
+            responsavelDemanda: '',
+            duracaoTotal: '',
+            diasRestantes: '',
+            progressoGeral: '',
+            statusAtual: '',
             etapas: [],
             tarefas: []
         };
         
-        // Buscar informações do projeto
-        const infoResponse = await gapi.client.sheets.spreadsheets.values.get({
+        // Buscar informações do projeto - Linha 2
+        const info2Response = await gapi.client.sheets.spreadsheets.values.get({
             spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
-            range: ranges.infoRow
+            range: ranges.infoLinha2
         });
+        if (info2Response.result.values && info2Response.result.values.length > 0) {
+            const row = info2Response.result.values[0];
+            // A2:G2 = Projeto/Demanda: | nome | Descrição: | desc | Unidade Demandante: | unidade
+            processo.descricao = row[3] || '';
+            processo.unidadeDemandante = row[5] || '';
+        }
         
-        if (infoResponse.result.values && infoResponse.result.values.length > 0) {
-            const infoRow = infoResponse.result.values[0];
-            processo.sei = infoRow[0] || '';
-            processo.prioridade = infoRow[1] || '';
-            processo.categoria = infoRow[2] || '';
-            processo.dataInicio = infoRow[3] || '';
-            processo.dataTermino = infoRow[4] || '';
-            processo.descricao = infoRow[5] || '';
+        // Buscar informações do projeto - Linha 3
+        const info3Response = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+            range: ranges.infoLinha3
+        });
+        if (info3Response.result.values && info3Response.result.values.length > 0) {
+            const row = info3Response.result.values[0];
+            // A3:H3 = Número SEI: | SEI | Categoria: | cat | Prioridade: | pri | Responsável Demanda: | resp
+            processo.sei = row[1] || '';
+            processo.categoria = row[3] || '';
+            processo.prioridade = row[5] || '';
+            processo.responsavelDemanda = row[7] || '';
+        }
+        
+        // Buscar informações do projeto - Linha 4
+        const info4Response = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+            range: ranges.infoLinha4
+        });
+        if (info4Response.result.values && info4Response.result.values.length > 0) {
+            const row = info4Response.result.values[0];
+            // A4:G4 = Data Início: | data | Data Término: | data | Duração (dias): | dur | Dias Restantes: | dias
+            processo.dataInicio = row[1] || '';
+            processo.dataTermino = row[3] || '';
+            processo.duracaoTotal = row[5] || '';
+            processo.diasRestantes = row[6] || '';
+        }
+        
+        // Buscar informações do projeto - Linha 5
+        const info5Response = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+            range: ranges.infoLinha5
+        });
+        if (info5Response.result.values && info5Response.result.values.length > 0) {
+            const row = info5Response.result.values[0];
+            // A5:C5 = Progresso Geral: | % | Status Atual: | status
+            processo.progressoGeral = row[1] || '';
+            processo.statusAtual = row[2] || '';
         }
         
         // Buscar dados das etapas
@@ -193,6 +240,7 @@ async function loadProcessoData(nomeProcesso) {
             processo.etapas = etapasResponse.result.values
                 .filter(row => row[0] && row[0].trim() !== '')
                 .map(row => ({
+                    // Campos originais (A-K)
                     nome: row[0] || '',
                     status: row[1] || 'Não iniciada',
                     responsavel: row[2] || '',
@@ -203,7 +251,11 @@ async function loadProcessoData(nomeProcesso) {
                     progresso: (parseFloat(row[7]) || 0) / 100, // Converter % para decimal
                     horasEstimadas: parseInt(row[8]) || 0,
                     horasReais: parseInt(row[9]) || 0,
-                    peso: (parseFloat(row[10]) || 15) / 100 // Converter % para decimal
+                    peso: (parseFloat(row[10]) || 15) / 100, // Converter % para decimal
+                    // Campos novos híbridos (L-N)
+                    situacao: row[11] || '',
+                    tarefasTexto: row[12] || '',
+                    observacoes: row[13] || ''
                 }));
         }
         
