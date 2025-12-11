@@ -20,8 +20,8 @@ const GOOGLE_SHEETS_CONFIG = {
         infoDataTermino: 'Processo 1!D4',
         infoOrcamento: 'Processo 1!F4',
         infoDescricao: 'Processo 1!B5',
-        etapas: 'Processo 1!A12:L17',
-        tarefas: 'Processo 1!A22:I30'
+        etapas: 'Processo 1!A12:L50',  // Expandido para até 39 etapas
+        tarefas: 'Processo 1!A22:I100' // Expandido para até 79 tarefas
     },
     
     // Intervalo de atualização automática (em milissegundos)
@@ -128,20 +128,22 @@ async function loadDataFromGoogleSheets() {
         const rows = response.result.values;
         
         if (rows && rows.length > 0) {
-            // Processar dados das etapas
-            processoData.etapas = rows.map((row, index) => ({
-                nome: row[0] || '',
-                status: row[1] || 'Não iniciada',
-                responsavel: row[2] || '',
-                dataInicio: row[3] || '',
-                dataTermino: row[4] || '',
-                produtos: row[5] || '',
-                dependencias: row[6] || '-',
-                progresso: parseFloat(row[7]) || 0,
-                horasEstimadas: parseInt(row[8]) || 0,
-                horasReais: parseInt(row[9]) || 0,
-                peso: parseFloat(row[10]) || 0.15
-            }));
+            // Processar dados das etapas (filtrar linhas vazias)
+            processoData.etapas = rows
+                .filter(row => row[0] && row[0].trim() !== '') // Ignorar linhas sem nome de etapa
+                .map((row, index) => ({
+                    nome: row[0] || '',
+                    status: row[1] || 'Não iniciada',
+                    responsavel: row[2] || '',
+                    dataInicio: row[3] || '',
+                    dataTermino: row[4] || '',
+                    produtos: row[5] || '',
+                    dependencias: row[6] || '-',
+                    progresso: parseFloat(row[7]) || 0,
+                    horasEstimadas: parseInt(row[8]) || 0,
+                    horasReais: parseInt(row[9]) || 0,
+                    peso: parseFloat(row[10]) || 0.15
+                }));
             
             // Buscar dados das tarefas
             const tarefasResponse = await gapi.client.sheets.spreadsheets.values.get({
@@ -152,16 +154,19 @@ async function loadDataFromGoogleSheets() {
             const tarefasRows = tarefasResponse.result.values;
             
             if (tarefasRows && tarefasRows.length > 0) {
-                processoData.tarefas = tarefasRows.map(row => ({
-                    etapa: row[0] || '',
-                    nome: row[1] || '',
-                    status: row[2] || 'Não iniciada',
-                    responsavel: row[3] || '',
-                    prioridade: row[4] || 'Média',
-                    prazo: row[5] || '',
-                    progresso: parseFloat(row[6]) || 0,
-                    horas: parseInt(row[7]) || 0
-                }));
+                // Filtrar linhas vazias nas tarefas também
+                processoData.tarefas = tarefasRows
+                    .filter(row => row[1] && row[1].trim() !== '') // Ignorar linhas sem nome de tarefa
+                    .map(row => ({
+                        etapa: row[0] || '',
+                        nome: row[1] || '',
+                        status: row[2] || 'Não iniciada',
+                        responsavel: row[3] || '',
+                        prioridade: row[4] || 'Média',
+                        prazo: row[5] || '',
+                        progresso: parseFloat(row[6]) || 0,
+                        horas: parseInt(row[7]) || 0
+                    }));
             }
             
             // Renderizar dados atualizados
