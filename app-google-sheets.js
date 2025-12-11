@@ -796,9 +796,7 @@ function criarConteudoAbaProcesso(proc, index) {
                         </thead>
                         <tbody>
                             ${proc.etapas.map((etapa, etapaIdx) => {
-                                // Debug: verificar se há conteúdo para mostrar
                                 const temConteudo = !!(etapa.tarefasTexto || etapa.observacoes || etapa.produtos);
-                                console.log(`Etapa ${etapa.nome}: temConteudo=${temConteudo}, produtos=${!!etapa.produtos}, tarefasTexto=${!!etapa.tarefasTexto}, observacoes=${!!etapa.observacoes}`);
                                 
                                 return `
                                 <tr>
@@ -919,16 +917,12 @@ function switchSubTab(processoId, subtab) {
 
 // ==================== TOGGLE DE DETALHES DAS ETAPAS ====================
 function toggleEtapaDetails(event, etapaId) {
-    console.log('toggleEtapaDetails chamado:', etapaId);
     const detailsRow = document.getElementById(etapaId);
-    console.log('Elemento encontrado:', detailsRow);
     const btn = event.target.closest('.btn-mini');
     
     if (detailsRow) {
         const isHidden = detailsRow.style.display === 'none' || detailsRow.style.display === '';
-        console.log('isHidden:', isHidden, 'display atual:', detailsRow.style.display);
         detailsRow.style.display = isHidden ? 'table-row' : 'none';
-        console.log('Novo display:', detailsRow.style.display);
         
         if (btn) {
             const icon = btn.querySelector('i');
@@ -936,8 +930,6 @@ function toggleEtapaDetails(event, etapaId) {
                 icon.className = isHidden ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
             }
         }
-    } else {
-        console.error('Elemento não encontrado:', etapaId);
     }
 }
 
