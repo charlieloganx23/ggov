@@ -11,11 +11,9 @@ const GOOGLE_SHEETS_CONFIG = {
     apiKey: 'SUA_API_KEY_AQUI', // Substituir pela sua API Key
     spreadsheetId: 'SEU_SPREADSHEET_ID_AQUI', // ID da planilha (da URL)
     
-    // Lista de processos (abas) a serem monitorados
-    processos: [
-        'Processo 1'
-        // Adicione mais abas aqui: 'Processo 2', 'Processo 3', etc.
-    ],
+    // DETECÇÃO AUTOMÁTICA DE ABAS
+    // O sistema detecta automaticamente qualquer aba que contenha este padrão no nome
+    padraoNomeProcesso: 'Processo', // Abas que contêm "Processo" serão carregadas
     
     // Intervalo de atualização automática (em milissegundos)
     autoRefreshInterval: 30000 // 30 segundos
@@ -81,14 +79,51 @@ function initGoogleAPI() {
     });
 }
 
+// ==================== DETECTAR ABAS AUTOMATICAMENTE ====================
+async function detectarAbasProcessos() {
+    try {
+        // Buscar metadados da planilha
+        const response = await gapi.client.sheets.spreadsheets.get({
+            spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId
+        });
+        
+        // Extrair nomes das abas
+        const sheets = response.result.sheets || [];
+        const nomesAbas = sheets.map(sheet => sheet.properties.title);
+        
+        // Filtrar abas que contêm o padrão configurado
+        const abasProcessos = nomesAbas.filter(nome => 
+            nome.includes(GOOGLE_SHEETS_CONFIG.padraoNomeProcesso)
+        );
+        
+        console.log(`🔍 Abas detectadas (${abasProcessos.length}):`, abasProcessos);
+        return abasProcessos;
+        
+    } catch (error) {
+        console.error('❌ Erro ao detectar abas:', error);
+        return [];
+    }
+}
+
 // ==================== CARREGAR DADOS DO GOOGLE SHEETS ====================
 async function loadDataFromGoogleSheets() {
     try {
         showLoading(true);
         todosProcessos = []; // Limpar array
         
-        // Carregar todos os processos configurados
-        for (const nomeProcesso of GOOGLE_SHEETS_CONFIG.processos) {
+        // Detectar abas automaticamente
+        const abasEncontradas = await detectarAbasProcessos();
+        
+        if (abasEncontradas.length === 0) {
+            console.warn('⚠️ Nenhuma aba de processo encontrada');
+            showNotification('⚠️ Nenhum processo encontrado na planilha', 'warning');
+            showLoading(false);
+            loadLocalData();
+            return;
+        }
+        
+        // Carregar todos os processos detectados
+        for (const nomeProcesso of abasEncontradas) {
             await loadProcessoData(nomeProcesso);
         }
         
