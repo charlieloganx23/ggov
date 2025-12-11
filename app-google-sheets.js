@@ -146,10 +146,13 @@ async function loadDataFromGoogleSheets() {
 
 async function loadProcessoData(nomeProcesso) {
     try {
+        // Escapar aspas simples no nome da aba e envolver em aspas para caracteres especiais
+        const nomeAbaEscapado = `'${nomeProcesso.replace(/'/g, "''")}'`;
+        
         const ranges = {
-            infoRow: `${nomeProcesso}!A3:F3`,
-            etapas: `${nomeProcesso}!A7:K50`,
-            tarefas: `${nomeProcesso}!A17:I100`
+            infoRow: `${nomeAbaEscapado}!A3:F3`,
+            etapas: `${nomeAbaEscapado}!A7:K50`,
+            tarefas: `${nomeAbaEscapado}!A17:I100`
         };
         
         const processo = {
