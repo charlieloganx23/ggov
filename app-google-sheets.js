@@ -397,7 +397,7 @@ function criarCardProcesso(proc, index) {
 // ==================== CRIAR ABAS DINÂMICAS PARA PROCESSOS ====================
 function criarAbasProcessos() {
     const tabsNav = document.getElementById('tabs-navigation');
-    const dashboard Btn = tabsNav.querySelector('[data-tab="dashboard"]');
+    const dashboardBtn = tabsNav.querySelector('[data-tab="dashboard"]');
     const container = document.getElementById('processos-tabs-container');
     
     if (!tabsNav || !container) return;
