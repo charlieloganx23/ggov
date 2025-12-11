@@ -491,8 +491,8 @@ body {
     padding: 12px 15px;
     border-radius: 8px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 8px;
     border-left: 4px solid #ccc;
     transition: all 0.3s ease;
 }
@@ -502,26 +502,138 @@ body {
     box-shadow: var(--shadow);
 }
 
-.etapa-em-execucao {
-    border-left-color: var(--warning-color);
+.etapa-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.etapa-concluida {
-    border-left-color: var(--success-color);
-}
-
-.etapa-pendente {
-    border-left-color: #ccc;
+.etapa-icon {
+    font-size: 1.2rem;
 }
 
 .etapa-nome {
     font-weight: 600;
     color: var(--text-color);
+    flex: 1;
+    min-width: 200px;
+}
+
+.etapa-resp {
+    font-size: 0.85rem;
+    color: #666;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.etapa-metrics {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-left: 35px;
 }
 
 .etapa-progress {
     font-weight: bold;
     color: var(--info-color);
+    font-size: 1.1rem;
+}
+
+.etapa-prazo {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.etapa-em-execução, .etapa-em-execucao {
+    border-left-color: var(--warning-color);
+}
+
+.etapa-concluída, .etapa-concluida {
+    border-left-color: var(--success-color);
+}
+
+.etapa-concluído, .etapa-concluido {
+    border-left-color: var(--success-color);
+}
+
+.etapa-paralisado, .etapa-paralisada {
+    border-left-color: #dc3545;
+}
+
+.etapa-pendente, .etapa-não-iniciada, .etapa-não-iniciado {
+    border-left-color: #ccc;
+}
+
+/* Seções do Resumo */
+.resumo-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.resumo-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.resumo-title {
+    display: block;
+    font-size: 1rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Tarefas Mini */
+.tarefas-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tarefa-grupo {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--info-color);
+}
+
+.tarefa-etapa-nome {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.tarefa-mini {
+    background: white;
+    padding: 8px 12px;
+    margin: 5px 0;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 2px solid #dee2e6;
+}
+
+.tarefa-icon {
+    font-size: 1rem;
+}
+
+.tarefa-nome {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.tarefa-progress {
+    font-weight: 600;
+    color: var(--info-color);
+    font-size: 0.85rem;
 }
 
 /* ==================== PROCESSO PAGE ==================== */
