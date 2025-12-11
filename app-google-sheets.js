@@ -349,8 +349,14 @@ function criarCardProcesso(proc, index) {
     }
     const progressoPct = Math.round(progressoTotal * 100);
     
-    const concluidas = proc.etapas.filter(e => e.status === 'Concluída').length;
-    const emExec = proc.etapas.filter(e => e.status === 'Em execução').length;
+    const concluidas = proc.etapas.filter(e => {
+        const status = (e.status || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return status === 'concluida' || status === 'concluido';
+    }).length;
+    const emExec = proc.etapas.filter(e => {
+        const status = (e.status || '').toLowerCase();
+        return status === 'em execução' || status === 'em execucao';
+    }).length;
     const totalEtapas = proc.etapas.length;
     
     let statusGeral = 'Não iniciada';
@@ -663,8 +669,14 @@ function criarConteudoAbaProcesso(proc, index) {
     }
     const progressoPct = Math.round(progressoTotal * 100);
     
-    const concluidas = proc.etapas.filter(e => e.status === 'Concluída').length;
-    const emExec = proc.etapas.filter(e => e.status === 'Em execução').length;
+    const concluidas = proc.etapas.filter(e => {
+        const status = (e.status || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return status === 'concluida' || status === 'concluido';
+    }).length;
+    const emExec = proc.etapas.filter(e => {
+        const status = (e.status || '').toLowerCase();
+        return status === 'em execução' || status === 'em execucao';
+    }).length;
     const totalEtapas = proc.etapas.length;
     
     let statusGeral = 'Não iniciada';
@@ -1706,9 +1718,18 @@ function calcularKPIsGlobais() {
         somaProgresso += progressoProcesso;
         
         // Contar etapas por status
-        const emExec = proc.etapas.filter(e => e.status === 'Em execução').length;
-        const concluidas = proc.etapas.filter(e => e.status === 'Concluída').length;
-        const naoIniciadas = proc.etapas.filter(e => e.status === 'Não iniciada').length;
+        const emExec = proc.etapas.filter(e => {
+            const status = (e.status || '').toLowerCase();
+            return status === 'em execução' || status === 'em execucao';
+        }).length;
+        const concluidas = proc.etapas.filter(e => {
+            const status = (e.status || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            return status === 'concluida' || status === 'concluido';
+        }).length;
+        const naoIniciadas = proc.etapas.filter(e => {
+            const status = (e.status || '').toLowerCase();
+            return status === 'não iniciada' || status === 'nao iniciada';
+        }).length;
         
         if (emExec > 0) processosAtivos++;
         if (concluidas === proc.etapas.length && proc.etapas.length > 0) processosConcluidos++;
