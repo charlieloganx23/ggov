@@ -16,7 +16,7 @@ const GOOGLE_SHEETS_CONFIG = {
     padraoNomeProcesso: 'Processo', // Abas que contêm "Processo" serão carregadas
     
     // Intervalo de atualização automática (em milissegundos)
-    autoRefreshInterval: 30000 // 30 segundos
+    autoRefreshInterval: 60000 // 1 minuto
 };
 
 let autoRefreshTimer = null;
