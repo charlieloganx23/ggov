@@ -197,10 +197,10 @@ async function loadProcessoData(nomeProcesso) {
                     dataTermino: row[4] || '',
                     produtos: row[5] || '',
                     dependencias: row[6] || '-',
-                    progresso: parseFloat(row[7]) || 0,
+                    progresso: (parseFloat(row[7]) || 0) / 100, // Converter % para decimal
                     horasEstimadas: parseInt(row[8]) || 0,
                     horasReais: parseInt(row[9]) || 0,
-                    peso: parseFloat(row[10]) || 0.15
+                    peso: (parseFloat(row[10]) || 15) / 100 // Converter % para decimal
                 }));
         }
         
@@ -220,7 +220,7 @@ async function loadProcessoData(nomeProcesso) {
                     responsavel: row[3] || '',
                     prioridade: row[4] || 'Média',
                     prazo: row[5] || '',
-                    progresso: parseFloat(row[6]) || 0,
+                    progresso: (parseFloat(row[6]) || 0) / 100, // Converter % para decimal
                     horas: parseInt(row[7]) || 0
                 }));
         }
