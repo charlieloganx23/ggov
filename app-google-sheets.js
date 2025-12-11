@@ -11,17 +11,14 @@ const GOOGLE_SHEETS_CONFIG = {
     apiKey: 'SUA_API_KEY_AQUI', // Substituir pela sua API Key
     spreadsheetId: 'SEU_SPREADSHEET_ID_AQUI', // ID da planilha (da URL)
     
-    // Ranges das abas na planilha
+    // Ranges das abas na planilha (Estrutura Tradicional)
     ranges: {
-        infoSEI: 'Processo 1!B3',
-        infoPrioridade: 'Processo 1!D3',
-        infoCategoria: 'Processo 1!F3',
-        infoDataInicio: 'Processo 1!B4',
-        infoDataTermino: 'Processo 1!D4',
-        infoOrcamento: 'Processo 1!F4',
-        infoDescricao: 'Processo 1!B5',
-        etapas: 'Processo 1!A12:L50',  // Expandido para até 39 etapas
-        tarefas: 'Processo 1!A22:I100' // Expandido para até 79 tarefas
+        // Informações do projeto (linha 3, colunas A-G)
+        infoRow: 'Processo 1!A3:G3',
+        // Etapas (a partir da linha 7, até 50 linhas)
+        etapas: 'Processo 1!A7:K50',
+        // Tarefas (a partir da linha 17, até 100 linhas)
+        tarefas: 'Processo 1!A17:I100'
     },
     
     // Intervalo de atualização automática (em milissegundos)
@@ -92,31 +89,22 @@ async function loadDataFromGoogleSheets() {
     try {
         showLoading(true);
         
-        // Buscar informações do projeto
-        const infoRanges = [
-            GOOGLE_SHEETS_CONFIG.ranges.infoSEI,
-            GOOGLE_SHEETS_CONFIG.ranges.infoPrioridade,
-            GOOGLE_SHEETS_CONFIG.ranges.infoCategoria,
-            GOOGLE_SHEETS_CONFIG.ranges.infoDataInicio,
-            GOOGLE_SHEETS_CONFIG.ranges.infoDataTermino,
-            GOOGLE_SHEETS_CONFIG.ranges.infoOrcamento,
-            GOOGLE_SHEETS_CONFIG.ranges.infoDescricao
-        ];
-        
-        const infoResponse = await gapi.client.sheets.spreadsheets.values.batchGet({
+        // Buscar informações do projeto (linha 3, colunas A-G)
+        const infoResponse = await gapi.client.sheets.spreadsheets.values.get({
             spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
-            ranges: infoRanges
+            range: GOOGLE_SHEETS_CONFIG.ranges.infoRow
         });
         
         // Atualizar informações do projeto
-        if (infoResponse.result.valueRanges) {
-            processoData.sei = infoResponse.result.valueRanges[0]?.values?.[0]?.[0] || processoData.sei;
-            processoData.prioridade = infoResponse.result.valueRanges[1]?.values?.[0]?.[0] || processoData.prioridade;
-            processoData.categoria = infoResponse.result.valueRanges[2]?.values?.[0]?.[0] || processoData.categoria;
-            processoData.dataInicio = infoResponse.result.valueRanges[3]?.values?.[0]?.[0] || processoData.dataInicio;
-            processoData.dataTermino = infoResponse.result.valueRanges[4]?.values?.[0]?.[0] || processoData.dataTermino;
-            processoData.orcamento = infoResponse.result.valueRanges[5]?.values?.[0]?.[0] || processoData.orcamento;
-            processoData.descricao = infoResponse.result.valueRanges[6]?.values?.[0]?.[0] || processoData.descricao;
+        if (infoResponse.result.values && infoResponse.result.values.length > 0) {
+            const infoRow = infoResponse.result.values[0];
+            processoData.sei = infoRow[0] || processoData.sei;
+            processoData.prioridade = infoRow[1] || processoData.prioridade;
+            processoData.categoria = infoRow[2] || processoData.categoria;
+            processoData.dataInicio = infoRow[3] || processoData.dataInicio;
+            processoData.dataTermino = infoRow[4] || processoData.dataTermino;
+            processoData.orcamento = infoRow[5] || processoData.orcamento;
+            processoData.descricao = infoRow[6] || processoData.descricao;
         }
         
         // Buscar dados das etapas
