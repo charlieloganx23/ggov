@@ -310,11 +310,14 @@ function criarCardProcesso(proc, index) {
     // Pegar responsáveis únicos
     const responsaveis = [...new Set(proc.etapas.map(e => e.responsavel).filter(r => r))].join(', ') || 'Não definido';
     
+    // Título do card: usa descrição se disponível, senão usa nome da aba
+    const tituloCard = proc.descricao || proc.nome || `Processo ${index + 1}`;
+    
     card.innerHTML = `
         <div class="card-header" style="background: linear-gradient(135deg, #1F4E78 0%, #366092 100%)">
             <div class="card-title">
                 <span class="processo-id">#${index + 1}</span>
-                <h3>${proc.descricao || proc.nome}</h3>
+                <h3>${tituloCard}</h3>
             </div>
             <div class="card-actions">
                 <button class="btn-expand" onclick="expandProcesso(${index + 1})">
@@ -411,11 +414,19 @@ function criarAbasProcessos() {
         const processoId = `processo-${index + 1}`;
         const processoNum = index + 1;
         
+        // Título curto para a aba (primeiras palavras da descrição ou nome da aba)
+        let tituloAba = proc.nome || `Processo ${processoNum}`;
+        if (proc.descricao && proc.descricao.length > 0) {
+            // Pega as primeiras 3-4 palavras da descrição
+            const palavras = proc.descricao.split(' ').slice(0, 4).join(' ');
+            tituloAba = palavras.length < proc.descricao.length ? palavras + '...' : palavras;
+        }
+        
         // Criar botão de aba
         const tabBtn = document.createElement('button');
         tabBtn.className = 'tab-btn tab-btn-processo';
         tabBtn.setAttribute('data-tab', processoId);
-        tabBtn.innerHTML = `📂 ${proc.nome || `Processo ${processoNum}`}`;
+        tabBtn.innerHTML = `📂 ${tituloAba}`;
         tabBtn.onclick = () => switchTab(processoId);
         
         // Inserir antes do Dashboard
