@@ -16,7 +16,8 @@ const GOOGLE_SHEETS_CONFIG = {
     padraoNomeProcesso: 'Processo', // Abas que contêm "Processo" serão carregadas
     
     // Intervalo de atualização automática (em milissegundos)
-    autoRefreshInterval: 60000 // 1 minuto
+    // autoRefreshInterval: 60000 // 1 minuto - DESATIVADO TEMPORARIAMENTE
+    autoRefreshInterval: 0 // Auto-refresh desativado (use o botão "Atualizar" manualmente)
 };
 
 let autoRefreshTimer = null;
@@ -856,6 +857,12 @@ async function saveDataToGoogleSheets(etapaIndex, campo, valor) {
 function startAutoRefresh() {
     if (autoRefreshTimer) {
         clearInterval(autoRefreshTimer);
+    }
+    
+    // Não iniciar auto-refresh se o intervalo for 0 (desativado)
+    if (GOOGLE_SHEETS_CONFIG.autoRefreshInterval === 0) {
+        console.log('⏸️ Auto-refresh desativado. Use o botão "Atualizar" para refresh manual.');
+        return;
     }
     
     autoRefreshTimer = setInterval(() => {
