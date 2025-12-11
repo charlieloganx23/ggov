@@ -13,8 +13,8 @@ const GOOGLE_SHEETS_CONFIG = {
     
     // Ranges das abas na planilha (Estrutura Tradicional)
     ranges: {
-        // Informações do projeto (linha 3, colunas A-G)
-        infoRow: 'Processo 1!A3:G3',
+        // Informações do projeto (linha 3, colunas A-F)
+        infoRow: 'Processo 1!A3:F3',
         // Etapas (a partir da linha 7, até 50 linhas)
         etapas: 'Processo 1!A7:K50',
         // Tarefas (a partir da linha 17, até 100 linhas)
@@ -103,8 +103,7 @@ async function loadDataFromGoogleSheets() {
             processoData.categoria = infoRow[2] || processoData.categoria;
             processoData.dataInicio = infoRow[3] || processoData.dataInicio;
             processoData.dataTermino = infoRow[4] || processoData.dataTermino;
-            processoData.orcamento = infoRow[5] || processoData.orcamento;
-            processoData.descricao = infoRow[6] || processoData.descricao;
+            processoData.descricao = infoRow[5] || processoData.descricao;
         }
         
         // Buscar dados das etapas
@@ -723,12 +722,6 @@ function updateProcessoInfo() {
     const dataTerminoValue = document.getElementById('data-termino-value');
     if (dataInicioValue) dataInicioValue.textContent = processoData.dataInicio || '10/12/2025';
     if (dataTerminoValue) dataTerminoValue.textContent = processoData.dataTermino || '31/01/2026';
-    
-    // Atualizar Orçamento
-    const orcamentoIndicator = document.getElementById('orcamento-indicator');
-    const orcamentoValue = document.getElementById('orcamento-value');
-    if (orcamentoIndicator) orcamentoIndicator.textContent = processoData.orcamento || 'R$ 15.000';
-    if (orcamentoValue) orcamentoValue.textContent = processoData.orcamento || 'R$ 15.000';
 }
 
 function initTabs() {

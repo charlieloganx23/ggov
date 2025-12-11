@@ -27,7 +27,7 @@ ws.row_dimensions[1].height = 30
 
 # ==================== INFORMAÇÕES DO PROJETO ====================
 # Cabeçalhos (linha 2)
-info_headers = ["SEI", "Prioridade", "Categoria", "Data Início", "Data Término", "Orçamento", "Descrição"]
+info_headers = ["SEI", "Prioridade", "Categoria", "Data Início", "Data Término", "Descrição"]
 for col, header in enumerate(info_headers, 1):
     cell = ws.cell(row=2, column=col)
     cell.value = header
@@ -43,7 +43,6 @@ info_data = [
     "Mapeamento",
     datetime(2025, 12, 10),
     datetime(2026, 1, 31),
-    "R$ 15.000",
     "Realizar o mapeamento completo dos processos administrativos e operacionais do GGOV"
 ]
 
