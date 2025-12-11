@@ -479,68 +479,68 @@ function criarCardProcesso(proc, index) {
             <div class="expanded-content">
                 <h4><i class="fas fa-list-check"></i> Resumo do Processo</h4>
                 
-                <!-- Etapas com Status Visual -->
+                <!-- Etapas com Tarefas Expansíveis (Accordion) -->
                 <div class="resumo-section">
                     <strong class="resumo-title">📊 Etapas (${proc.etapas.length})</strong>
-                    <div class="etapas-mini">
-                        ${proc.etapas.map(etapa => {
+                    <div class="etapas-accordion">
+                        ${proc.etapas.map((etapa, etapaIdx) => {
                             const statusIcon = etapa.status === 'Concluída' || etapa.status === 'Concluído' ? '✅' : 
                                              etapa.status === 'Em execução' ? '🔄' : 
                                              etapa.status === 'Paralisado' || etapa.status === 'Paralisada' ? '⏸️' : '⚪';
-                            return `
-                            <div class="etapa-mini etapa-${etapa.status.toLowerCase().replace(' ', '-')}">
-                                <div class="etapa-info">
-                                    <span class="etapa-icon">${statusIcon}</span>
-                                    <span class="etapa-nome">${etapa.nome}</span>
-                                    ${etapa.responsavel ? `<span class="etapa-resp">👤 ${etapa.responsavel}</span>` : ''}
-                                </div>
-                                <div class="etapa-metrics">
-                                    <span class="etapa-progress">${Math.round((etapa.progresso || 0) * 100)}%</span>
-                                    ${etapa.dataTermino ? `<span class="etapa-prazo">📅 ${etapa.dataTermino}</span>` : ''}
-                                </div>
-                            </div>
-                        `;
-                        }).join('')}
-                    </div>
-                </div>
-                
-                <!-- Tarefas Agrupadas por Etapa -->
-                ${proc.tarefas && proc.tarefas.length > 0 ? `
-                <div class="resumo-section">
-                    <strong class="resumo-title">✅ Tarefas (${proc.tarefas.length})</strong>
-                    <div class="tarefas-mini">
-                        ${(() => {
-                            // Agrupar tarefas por etapa
-                            const tarefasPorEtapa = {};
-                            proc.tarefas.forEach(tarefa => {
-                                const etapa = tarefa.etapa || 'Sem etapa';
-                                if (!tarefasPorEtapa[etapa]) {
-                                    tarefasPorEtapa[etapa] = [];
-                                }
-                                tarefasPorEtapa[etapa].push(tarefa);
-                            });
                             
-                            // Renderizar tarefas agrupadas
-                            return Object.entries(tarefasPorEtapa).map(([etapa, tarefas]) => `
-                                <div class="tarefa-grupo">
-                                    <div class="tarefa-etapa-nome">📁 ${etapa}</div>
-                                    ${tarefas.map(tarefa => {
-                                        const statusIcon = tarefa.status === 'Concluída' || tarefa.status === 'Concluído' ? '✅' : 
+                            // Filtrar tarefas desta etapa
+                            const tarefasDaEtapa = proc.tarefas ? proc.tarefas.filter(t => 
+                                t.etapa && t.etapa.toLowerCase().includes(etapa.nome.toLowerCase())
+                            ) : [];
+                            
+                            const temTarefas = tarefasDaEtapa.length > 0;
+                            
+                            return `
+                            <div class="etapa-accordion-item">
+                                <div class="etapa-accordion-header ${temTarefas ? 'clickable' : ''}" 
+                                     ${temTarefas ? `onclick="toggleEtapaTarefas('processo-${index + 1}-etapa-${etapaIdx}')"` : ''}>
+                                    <div class="etapa-info-row">
+                                        <span class="etapa-icon">${statusIcon}</span>
+                                        <span class="etapa-nome">${etapa.nome}</span>
+                                        ${etapa.responsavel ? `<span class="etapa-resp">👤 ${etapa.responsavel}</span>` : ''}
+                                    </div>
+                                    <div class="etapa-metrics-row">
+                                        <span class="etapa-progress">${Math.round((etapa.progresso || 0) * 100)}%</span>
+                                        ${etapa.dataTermino ? `<span class="etapa-prazo">📅 ${etapa.dataTermino}</span>` : ''}
+                                        ${temTarefas ? `<span class="etapa-toggle-icon"><i class="fas fa-chevron-down"></i></span>` : ''}
+                                    </div>
+                                </div>
+                                
+                                ${temTarefas ? `
+                                <div id="processo-${index + 1}-etapa-${etapaIdx}" class="etapa-tarefas-list" style="display: none;">
+                                    ${tarefasDaEtapa.map(tarefa => {
+                                        const tarefaIcon = tarefa.status === 'Concluída' || tarefa.status === 'Concluído' ? '✅' : 
                                                          tarefa.status === 'Em execução' ? '🔄' : '⚪';
+                                        const prioridadeClass = tarefa.prioridade?.toLowerCase() || 'media';
+                                        
                                         return `
-                                        <div class="tarefa-mini">
-                                            <span class="tarefa-icon">${statusIcon}</span>
-                                            <span class="tarefa-nome">${tarefa.nome}</span>
-                                            <span class="tarefa-progress">${Math.round((tarefa.progresso || 0) * 100)}%</span>
+                                        <div class="tarefa-card">
+                                            <div class="tarefa-header">
+                                                <span class="tarefa-icon">${tarefaIcon}</span>
+                                                <span class="tarefa-titulo">${tarefa.nome}</span>
+                                            </div>
+                                            <div class="tarefa-details">
+                                                ${tarefa.responsavel ? `<span class="tarefa-detail"><i class="fas fa-user"></i> ${tarefa.responsavel}</span>` : ''}
+                                                ${tarefa.prioridade ? `<span class="badge badge-${prioridadeClass}">${tarefa.prioridade}</span>` : ''}
+                                                ${tarefa.prazo ? `<span class="tarefa-detail"><i class="fas fa-calendar"></i> ${tarefa.prazo}</span>` : ''}
+                                                <span class="tarefa-detail"><i class="fas fa-tasks"></i> ${Math.round((tarefa.progresso || 0) * 100)}%</span>
+                                                ${tarefa.horas ? `<span class="tarefa-detail"><i class="fas fa-clock"></i> ${tarefa.horas}h</span>` : ''}
+                                            </div>
                                         </div>
                                         `;
                                     }).join('')}
                                 </div>
-                            `).join('');
-                        })()}
+                                ` : ''}
+                            </div>
+                            `;
+                        }).join('')}
                     </div>
                 </div>
-                ` : ''}
             </div>
         </div>
     `;
@@ -869,6 +869,29 @@ function toggleEtapaDetails(etapaId) {
             if (icon) {
                 icon.className = isHidden ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
             }
+        }
+    }
+}
+
+// ==================== TOGGLE DE TAREFAS NO ACCORDION (COMMAND CENTER) ====================
+function toggleEtapaTarefas(etapaId) {
+    const tarefasList = document.getElementById(etapaId);
+    const header = event.target.closest('.etapa-accordion-header');
+    
+    if (tarefasList && header) {
+        const isHidden = tarefasList.style.display === 'none';
+        tarefasList.style.display = isHidden ? 'block' : 'none';
+        
+        const icon = header.querySelector('.etapa-toggle-icon i');
+        if (icon) {
+            icon.className = isHidden ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+        }
+        
+        // Adicionar classe active ao header
+        if (isHidden) {
+            header.classList.add('active');
+        } else {
+            header.classList.remove('active');
         }
     }
 }
