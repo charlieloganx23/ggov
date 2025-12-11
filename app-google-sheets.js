@@ -531,7 +531,7 @@ function criarCardProcesso(proc, index) {
                             return `
                             <div class="etapa-accordion-item">
                                 <div class="etapa-accordion-header ${temTarefas ? 'clickable' : ''}" 
-                                     ${temTarefas ? `onclick="toggleEtapaTarefas('processo-${index + 1}-etapa-${etapaIdx}')"` : ''}>
+                                     ${temTarefas ? `onclick="toggleEtapaTarefas('cc-processo-${index + 1}-etapa-${etapaIdx}')"` : ''}>
                                     <div class="etapa-info-row">
                                         <span class="etapa-icon">${statusIcon}</span>
                                         <span class="etapa-nome">${etapa.nome}</span>
@@ -545,7 +545,7 @@ function criarCardProcesso(proc, index) {
                                 </div>
                                 
                                 ${temTarefas ? `
-                                <div id="processo-${index + 1}-etapa-${etapaIdx}" class="etapa-tarefas-list" style="display: none;">
+                                <div id="cc-processo-${index + 1}-etapa-${etapaIdx}" class="etapa-tarefas-list" style="display: none;">
                                     ${tarefasDaEtapa.map(tarefa => {
                                         const tarefaIcon = tarefa.status === 'Concluída' || tarefa.status === 'Concluído' ? '✅' : 
                                                          tarefa.status === 'Em execução' ? '🔄' : '⚪';
