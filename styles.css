@@ -300,6 +300,78 @@ body {
     padding: 25px;
 }
 
+/* ==================== CARDS COMPACTOS/EXPANSÍVEIS ==================== */
+.card-body-compact {
+    padding: 20px 25px;
+    border-top: 1px solid #e9ecef;
+}
+
+.card-metrics-compact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.metric-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.metric-value-compact {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.card-body-expanded {
+    padding: 25px;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+    animation: expandCard 0.3s ease;
+}
+
+@keyframes expandCard {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 2000px;
+    }
+}
+
+.processo-card.expanded {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.btn-expand-card {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-expand-card:hover {
+    background: white;
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.btn-expand-card i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
 .card-metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

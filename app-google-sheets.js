@@ -406,18 +406,37 @@ function criarCardProcesso(proc, index) {
                 <h3>${tituloCard}</h3>
             </div>
             <div class="card-actions">
-                <button class="btn-expand" onclick="expandProcesso(${index + 1})">
-                    <i class="fas fa-chevron-down"></i> Expandir Detalhes
+                <button class="btn-expand-card" onclick="toggleCardExpansion(${index + 1})">
+                    <i class="fas fa-chevron-down"></i>
                 </button>
             </div>
         </div>
         
-        <div class="card-body">
-            <div class="card-metrics">
-                <div class="metric">
+        <!-- RESUMO COMPACTO (sempre visível) -->
+        <div class="card-body-compact">
+            <div class="card-metrics-compact">
+                <div class="metric-compact">
                     <span class="metric-label">Status</span>
                     <span class="status-badge ${statusClass}">${statusGeral}</span>
                 </div>
+                <div class="metric-compact">
+                    <span class="metric-label">Progresso</span>
+                    <span class="metric-value-compact">${progressoPct}%</span>
+                </div>
+                <div class="metric-compact">
+                    <span class="metric-label">SEI</span>
+                    <span class="metric-value-compact">${proc.sei || '-'}</span>
+                </div>
+                <div class="metric-compact">
+                    <span class="metric-label">Prioridade</span>
+                    <span class="badge badge-${proc.prioridade?.toLowerCase() || 'media'}">${proc.prioridade || 'Média'}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DETALHES COMPLETOS (expansível) -->
+        <div class="card-body-expanded" id="card-${index + 1}-details" style="display: none;">
+            <div class="card-metrics">
                 <div class="metric">
                     <span class="metric-label">% Conclusão</span>
                     <div class="progress-bar">
@@ -483,15 +502,19 @@ function criarCardProcesso(proc, index) {
                     <span class="indicator-value">${proc.sei || '-'}</span>
                 </div>
             </div>
-        </div>
-        
-        <div class="card-expanded" id="processo-${index + 1}-details" style="display: none;">
+            
+            <!-- DESCRIÇÃO -->
+            <div class="descricao-box">
+                <strong>Descrição:</strong>
+                <p>${proc.descricao || 'Sem descrição disponível'}</p>
+            </div>
+            
+            <!-- ETAPAS COM ACCORDION -->
             <div class="expanded-content">
-                <h4><i class="fas fa-list-check"></i> Resumo do Processo</h4>
+                <h4 style="margin-top: 25px;"><i class="fas fa-list-check"></i> Etapas e Tarefas</h4>
                 
                 <!-- Etapas com Tarefas Expansíveis (Accordion) -->
                 <div class="resumo-section">
-                    <strong class="resumo-title">📊 Etapas (${proc.etapas.length})</strong>
                     <div class="etapas-accordion">
                         ${proc.etapas.map((etapa, etapaIdx) => {
                             const statusIcon = etapa.status === 'Concluída' || etapa.status === 'Concluído' ? '✅' : 
@@ -556,6 +579,29 @@ function criarCardProcesso(proc, index) {
     `;
     
     return card;
+}
+
+// ==================== TOGGLE DE EXPANSÃO DE CARDS ====================
+function toggleCardExpansion(processoNum) {
+    const card = document.querySelector(`.processo-card[data-processo="${processoNum}"]`);
+    if (!card) return;
+    
+    const detailsSection = card.querySelector('.card-body-expanded');
+    const btn = card.querySelector('.btn-expand-card');
+    const icon = btn ? btn.querySelector('i') : null;
+    
+    if (detailsSection) {
+        const isHidden = detailsSection.style.display === 'none';
+        detailsSection.style.display = isHidden ? 'block' : 'none';
+        
+        if (icon) {
+            icon.className = isHidden ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+        }
+        
+        if (card) {
+            card.classList.toggle('expanded', isHidden);
+        }
+    }
 }
 
 // ==================== CRIAR ABAS DINÂMICAS PARA PROCESSOS ====================
