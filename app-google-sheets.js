@@ -240,18 +240,18 @@ async function loadProcessoData(nomeProcesso) {
         });
         
         if (etapasResponse.result.values && etapasResponse.result.values.length > 0) {
-            processo.etapas = etapasResponse.result.values
-                .filter(row => {
-                    // Filtrar linhas vazias
-                    if (!row[0] || row[0].trim() === '') return false;
-                    
-                    // IMPORTANTE: Parar de ler quando encontrar "Etapa" (cabeçalho da seção de tarefas)
-                    // Isso garante que só pegamos as etapas reais do processo
-                    const nome = row[0].trim();
-                    if (nome.toLowerCase() === 'etapa') return false;
-                    
-                    return true;
-                })
+            // Encontrar o índice onde começa a seção de tarefas (linha com "Etapa" na coluna A)
+            const indiceTarefas = etapasResponse.result.values.findIndex(row => 
+                row[0] && row[0].trim().toLowerCase() === 'etapa'
+            );
+            
+            // Se encontrou "Etapa", pegar apenas as linhas ANTES dela. Senão, pegar tudo
+            const linhasEtapas = indiceTarefas >= 0 
+                ? etapasResponse.result.values.slice(0, indiceTarefas)
+                : etapasResponse.result.values;
+            
+            processo.etapas = linhasEtapas
+                .filter(row => row[0] && row[0].trim() !== '')
                 .map(row => ({
                     // Campos originais (A-K)
                     nome: row[0] || '',
