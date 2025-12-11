@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 GGOV Command Center - Sistema Revolucionário</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <h1><i class="fas fa-bullseye"></i> GGOV COMMAND CENTER - VISÃO EXECUTIVA 360°</h1>
+            <p class="timestamp">⏰ Atualização em Tempo Real: <span id="timestamp"></span></p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- KPIs GLOBAIS -->
+        <section class="kpis-section">
+            <h2 class="section-title">📊 INDICADORES ESTRATÉGICOS EM TEMPO REAL</h2>
+            <div class="kpis-grid">
+                <div class="kpi-card" style="--kpi-color: #4472C4">
+                    <div class="kpi-label">📋 Total<br>Processos</div>
+                    <div class="kpi-value" id="kpi-total">3</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color: #FFA500">
+                    <div class="kpi-label">🚀 Em<br>Execução</div>
+                    <div class="kpi-value" id="kpi-ativos">1</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color: #70AD47">
+                    <div class="kpi-label">✅ Concluídos</div>
+                    <div class="kpi-value" id="kpi-concluidos">0</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color: #5B9BD5">
+                    <div class="kpi-label">⏸️ Planejados</div>
+                    <div class="kpi-value" id="kpi-planejados">2</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color: #C00000">
+                    <div class="kpi-label">🔴 Atrasados</div>
+                    <div class="kpi-value" id="kpi-atrasados">0</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color: #92D050">
+                    <div class="kpi-label">💯 Saúde<br>Geral</div>
+                    <div class="kpi-value" id="kpi-saude">72%</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color: #F4B084">
+                    <div class="kpi-label">⏱️ Prazo<br>Médio</div>
+                    <div class="kpi-value" id="kpi-prazo">52d</div>
+                </div>
+                <div class="kpi-card" style="--kpi-color: #7030A0">
+                    <div class="kpi-label">💰 Orçamento<br>Total</div>
+                    <div class="kpi-value" id="kpi-orcamento">R$ 48k</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ALERTAS -->
+        <section class="alerts-section">
+            <h2 class="section-title alert-title">🔔 ALERTAS E NOTIFICAÇÕES AUTOMÁTICAS</h2>
+            <div class="alerts-container" id="alerts-container">
+                <div class="alert alert-warning">
+                    🟡 ATENÇÃO: Processo em execução necessita acompanhamento próximo
+                </div>
+            </div>
+        </section>
+
+        <!-- NAVEGAÇÃO DE ABAS -->
+        <div class="tabs-navigation">
+            <button class="tab-btn active" data-tab="command-center">🎯 Command Center</button>
+            <button class="tab-btn" data-tab="processo-1">📂 Processo 1</button>
+            <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
+        </div>
+
+        <!-- TAB: COMMAND CENTER -->
+        <section id="command-center" class="tab-content active">
+            <h2 class="section-title">📂 PROCESSOS - VISÃO COMPLETA COM CARDS INTELIGENTES</h2>
+            
+            <div class="processo-card" data-processo="1">
+                <div class="card-header" style="background: linear-gradient(135deg, #1F4E78 0%, #366092 100%)">
+                    <div class="card-title">
+                        <span class="processo-id">#1</span>
+                        <h3>Mapeamento dos processos do Gabinete de Governança</h3>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-expand" onclick="expandProcesso(1)">
+                            <i class="fas fa-chevron-down"></i> Expandir Detalhes
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="card-metrics">
+                        <div class="metric">
+                            <span class="metric-label">Status</span>
+                            <span class="status-badge status-em-execucao">Em execução</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">% Conclusão</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 43%">43%</div>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Etapas</span>
+                            <span class="metric-value">2/6 <i class="fas fa-tasks"></i></span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Responsáveis</span>
+                            <span class="metric-value">Luma Damon, Suerlei Gondim</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-timeline">
+                        <div class="timeline-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span><strong>Início:</strong> 10/12/2025</span>
+                        </div>
+                        <div class="timeline-item">
+                            <i class="fas fa-calendar-check"></i>
+                            <span><strong>Término:</strong> 31/01/2026</span>
+                        </div>
+                        <div class="timeline-item">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>Duração:</strong> 52 dias</span>
+                        </div>
+                        <div class="timeline-item">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span><strong>Dias Rest.:</strong> 52 dias</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-indicators">
+                        <div class="indicator">
+                            <span class="indicator-label">Alerta</span>
+                            <span class="badge badge-success">🟢 NO PRAZO</span>
+                        </div>
+                        <div class="indicator">
+                            <span class="indicator-label">Saúde</span>
+                            <span class="badge badge-warning">🟡 Bom</span>
+                        </div>
+                        <div class="indicator">
+                            <span class="indicator-label">Orçamento</span>
+                            <span class="indicator-value" id="orcamento-indicator">R$ 15.000</span>
+                        </div>
+                        <div class="indicator">
+                            <span class="indicator-label">SEI</span>
+                            <span class="indicator-value" id="sei-indicator">0000000000000</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-expanded" id="processo-1-details" style="display: none;">
+                    <div class="expanded-content">
+                        <h4><i class="fas fa-info-circle"></i> Etapas Resumidas</h4>
+                        <div class="etapas-mini">
+                            <div class="etapa-mini etapa-em-execucao">
+                                <span class="etapa-nome">Levantamento de Informações</span>
+                                <span class="etapa-progress">70%</span>
+                            </div>
+                            <div class="etapa-mini etapa-em-execucao">
+                                <span class="etapa-nome">Mapeamento de Processos</span>
+                                <span class="etapa-progress">60%</span>
+                            </div>
+                            <div class="etapa-mini etapa-pendente">
+                                <span class="etapa-nome">Análise de Processos</span>
+                                <span class="etapa-progress">0%</span>
+                            </div>
+                            <div class="etapa-mini etapa-pendente">
+                                <span class="etapa-nome">Documentação e Relatório Final</span>
+                                <span class="etapa-progress">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: PROCESSO 1 -->
+        <section id="processo-1" class="tab-content">
+            <div class="processo-header">
+                <h2 class="processo-title">📂 PROCESSO 1: Mapeamento dos processos do Gabinete de Governança</h2>
+            </div>
+
+            <div class="projeto-info">
+                <h3 class="subsection-title">📋 INFORMAÇÕES DO PROJETO</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">SEI:</span>
+                        <span class="info-value" id="sei-value">0000000000000</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Prioridade:</span>
+                        <span class="badge badge-alta" id="prioridade-badge">Alta</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Categoria:</span>
+                        <span class="info-value" id="categoria-value">Mapeamento</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status Geral:</span>
+                        <span class="status-badge status-em-execucao">Em execução</span>
+                    </div>
+                    <div class="info-item highlight">
+                        <span class="info-label">% Conclusão:</span>
+                        <span class="info-value-big">43%</span>
+                    </div>
+                </div>
+                
+                <div class="info-grid mt-2">
+                    <div class="info-item">
+                        <span class="info-label">Data Início:</span>
+                        <span class="info-value" id="data-inicio-value">10/12/2025</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Data Término:</span>
+                        <span class="info-value" id="data-termino-value">31/01/2026</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Duração:</span>
+                        <span class="info-value">52 dias</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Dias Restantes:</span>
+                        <span class="info-value">52 dias</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Orçamento:</span>
+                        <span class="info-value" id="orcamento-value">R$ 15.000</span>
+                    </div>
+                </div>
+
+                <div class="descricao-box">
+                    <strong>Descrição:</strong>
+                    <p>Realizar o mapeamento completo dos processos administrativos e operacionais do Gabinete de Governança (GGOV), 
+                    com a finalidade de otimizar o desempenho das atividades e garantir maior transparência, eficiência e controle nos 
+                    fluxos de trabalho. O mapeamento englobará a identificação, documentação e análise de todos os processos-chave executados 
+                    pelo GGOV, desde o planejamento até a execução das tarefas, visando proporcionar uma visão clara e detalhada de cada etapa, 
+                    responsável, entrada e saída envolvidas.</p>
+                </div>
+            </div>
+
+            <div class="etapas-section">
+                <h3 class="subsection-title">🔄 ETAPAS DO PROCESSO - DETALHAMENTO COMPLETO</h3>
+                <p class="hint">💡 Clique em cada etapa para expandir tarefas detalhadas</p>
+                
+                <div class="table-responsive">
+                    <table class="etapas-table">
+                        <thead>
+                            <tr>
+                                <th>Etapa</th>
+                                <th>Status</th>
+                                <th>Responsável</th>
+                                <th>Dt. Início</th>
+                                <th>Dt. Término</th>
+                                <th>Produtos/Entregas</th>
+                                <th>% Progresso</th>
+                                <th>Horas</th>
+                                <th>Peso</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="etapas-tbody">
+                            <!-- Etapas serão inseridas via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tarefas-section">
+                <h3 class="subsection-title">📝 TAREFAS DETALHADAS POR ETAPA</h3>
+                
+                <div class="tarefas-filtro">
+                    <label>Filtrar por Etapa:</label>
+                    <select id="filtro-etapa" onchange="filtrarTarefas()">
+                        <option value="all">Todas as Etapas</option>
+                        <option value="Etapa 1">Etapa 1: Levantamento</option>
+                        <option value="Etapa 2">Etapa 2: Mapeamento</option>
+                    </select>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="tarefas-table">
+                        <thead>
+                            <tr>
+                                <th>Etapa</th>
+                                <th>Tarefa</th>
+                                <th>Status</th>
+                                <th>Responsável</th>
+                                <th>Prioridade</th>
+                                <th>Prazo</th>
+                                <th>% Conclusão</th>
+                                <th>Horas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tarefas-tbody">
+                            <!-- Tarefas serão inseridas via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: DASHBOARD -->
+        <section id="dashboard" class="tab-content">
+            <h2 class="section-title">📊 DASHBOARD ANALÍTICO - INTELIGÊNCIA DE PROCESSOS</h2>
+            
+            <div class="dashboard-grid">
+                <div class="chart-card">
+                    <h3>Distribuição de Status das Etapas</h3>
+                    <canvas id="statusChart"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>Progresso por Etapa</h3>
+                    <canvas id="progressChart"></canvas>
+                </div>
+                
+                <div class="stats-card">
+                    <h3>KPIs do Processo</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Etapas</div>
+                            <div class="stat-value" style="color: #4472C4">6</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Taxa Conclusão</div>
+                            <div class="stat-value" style="color: #70AD47">43%</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Horas Planejadas</div>
+                            <div class="stat-value" style="color: #FFA500">480h</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Horas Executadas</div>
+                            <div class="stat-value" style="color: #C00000">128h</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>Timeline de Execução</h3>
+                    <div class="gantt-mini">
+                        <div class="gantt-row">
+                            <span class="gantt-label">Levantamento</span>
+                            <div class="gantt-bar" style="width: 70%; background: #70AD47"></div>
+                        </div>
+                        <div class="gantt-row">
+                            <span class="gantt-label">Mapeamento</span>
+                            <div class="gantt-bar" style="width: 60%; background: #FFA500"></div>
+                        </div>
+                        <div class="gantt-row">
+                            <span class="gantt-label">Análise</span>
+                            <div class="gantt-bar" style="width: 0%; background: #E0E0E0"></div>
+                        </div>
+                        <div class="gantt-row">
+                            <span class="gantt-label">Documentação</span>
+                            <div class="gantt-bar" style="width: 0%; background: #E0E0E0"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>🚀 Sistema Revolucionário GGOV | Command Center + Workbench + Automação Inteligente | 2025</p>
+        <p style="font-size: 0.85rem; margin-top: 5px;">✨ Integrado com Google Sheets API para sincronização em tempo real</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app-google-sheets.js"></script>
+</body>
+</html>
