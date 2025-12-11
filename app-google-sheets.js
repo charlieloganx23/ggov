@@ -131,7 +131,13 @@ async function loadDataFromGoogleSheets() {
         // Renderizar todos os processos
         renderTodosProcessos();
         calcularKPIsGlobais();
-        updateCharts();
+        
+        // Inicializar gráficos na primeira vez, depois apenas atualizar
+        if (!statusChart || !progressChart) {
+            initCharts();
+        } else {
+            updateCharts();
+        }
         
         console.log('✅ Dados de todos os processos carregados:', new Date().toLocaleTimeString());
         showNotification(`✅ ${todosProcessos.length} processo(s) atualizado(s)!`, 'success');
