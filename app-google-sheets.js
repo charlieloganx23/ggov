@@ -307,11 +307,12 @@ function criarCardProcesso(proc, index) {
         if (!isNaN(dias)) duracao = dias + ' dias';
     }
     
-    // Pegar responsáveis únicos (apenas valores válidos)
+    // Pegar responsáveis únicos (apenas valores válidos, excluindo status e headers)
+    const valoresInvalidos = ['Status', 'Em execução', 'Concluída', 'Não iniciada', 'Responsável', '-', ''];
     const responsaveis = [...new Set(
         proc.etapas
             .map(e => e.responsavel)
-            .filter(r => r && r.trim() !== '' && r !== '-')
+            .filter(r => r && r.trim() !== '' && !valoresInvalidos.includes(r.trim()))
     )].join(', ') || 'Não definido';
     
     // Título do card: prioriza nome da aba se tiver, senão descrição
